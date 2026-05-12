@@ -1,0 +1,3 @@
+# rpa-ipa-analyzer
+# No external dependencies required — uses Python standard library only.
+# Minimum Python version: 3.8+

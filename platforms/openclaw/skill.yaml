@@ -1,0 +1,27 @@
+# OpenClaw Platform Adapter for rpa-ipa-analyzer
+#
+# Copy this file to ~/.openclaw/skills/rpa-ipa-analyzer/skill.yaml
+# along with the rest of the skill files.
+
+name: rpa-ipa-analyzer
+version: 1.0.0
+description: >-
+  Analyze IPA Studio RPA projects to produce comprehensive business and code
+  analysis reports with Mermaid flowcharts.
+
+entrypoint: SKILL.md
+
+runtime:
+  type: python
+  min_version: "3.8"
+
+actions:
+  extract:
+    command: python3 scripts/extract_nodes.py
+    args:
+      - name: project_path
+        type: path
+        required: true
+      - name: force
+        type: flag
+        required: false

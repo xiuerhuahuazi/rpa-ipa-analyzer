@@ -1,0 +1,30 @@
+# Codex Platform Adapter for rpa-ipa-analyzer
+#
+# Copy this file to ~/.codex/skills/rpa-ipa-analyzer/codex.yaml
+# along with the rest of the skill files.
+
+name: rpa-ipa-analyzer
+version: 1.0.0
+description: >-
+  Analyze IPA Studio RPA projects to produce comprehensive business and code
+  analysis reports with Mermaid flowcharts. Handles data-processing projects
+  (Python/pandas) and web automation projects (JavaScript injection, browser
+  operations, UI element interaction).
+
+entrypoint: SKILL.md
+runtime: python3
+
+triggers:
+  - "analyze this RPA project"
+  - "analyze this IPA Studio project"
+  - "understand this IPA Studio flow"
+  - "extract Python code from flow"
+  - "map the business logic"
+  - "generate a RPA analysis report"
+
+dependencies:
+  python: ">=3.8"
+  # Standard library only — no pip packages required
+
+scripts:
+  extract: scripts/extract_nodes.py
