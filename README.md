@@ -39,16 +39,35 @@ git clone https://github.com/xiuerhuahuazi/rpa-ipa-analyzer.git
 
 ### Step 2: Platform Setup
 
+> **Important:** This repo contains files for multiple platforms plus repo metadata. Only copy the files your platform actually needs. The table below shows what's required per platform.
+
+#### What to Copy (Per Platform)
+
+| File | Claude Code | OpenAI Codex | OpenClaw |
+|------|:-----------:|:------------:|:--------:|
+| `SKILL.md` | ✅ Required | ✅ Required | ✅ Required |
+| `scripts/` | ✅ Required | ✅ Required | ✅ Required |
+| `references/` | ✅ Required | ✅ Required | ✅ Required |
+| `evals/` | ✅ Optional | ❌ Not needed | ❌ Not needed |
+| `platforms/codex/` | ❌ Not needed | ✅ Required | ❌ Not needed |
+| `platforms/openclaw/` | ❌ Not needed | ❌ Not needed | ✅ Required |
+| `README.md` | ❌ Not needed | ❌ Not needed | ❌ Not needed |
+| `LICENSE` | ❌ Not needed | ❌ Not needed | ❌ Not needed |
+| `CHANGELOG.md` | ❌ Not needed | ❌ Not needed | ❌ Not needed |
+| `.gitignore` | ❌ Not needed | ❌ Not needed | ❌ Not needed |
+| `requirements.txt` | ❌ Not needed | ❌ Not needed | ❌ Not needed |
+
+Repo-only files (`README.md`, `LICENSE`, `CHANGELOG.md`, `.gitignore`, `requirements.txt`) are project metadata — they are not used by any platform at runtime and should be excluded from skill installation.
+
 #### Claude Code
 
-Register the skill with Claude Code:
-
 ```bash
-# From the cloned repo directory:
-claude /add-skill
-
-# Or manually copy to the Claude Code skills directory:
-cp -r rpa-ipa-analyzer ~/.claude/skills/rpa-ipa-analyzer
+# Copy only the essential files:
+mkdir -p ~/.claude/skills/rpa-ipa-analyzer
+cp SKILL.md ~/.claude/skills/rpa-ipa-analyzer/
+cp -r scripts/ ~/.claude/skills/rpa-ipa-analyzer/
+cp -r references/ ~/.claude/skills/rpa-ipa-analyzer/
+cp -r evals/ ~/.claude/skills/rpa-ipa-analyzer/   # optional
 ```
 
 Verify installation:
@@ -58,35 +77,22 @@ ls ~/.claude/skills/rpa-ipa-analyzer/SKILL.md
 
 #### OpenAI Codex
 
-Place the skill in the Codex skills directory and create a `codex.yaml`:
-
 ```bash
 mkdir -p ~/.codex/skills/rpa-ipa-analyzer
-cp -r rpa-ipa-analyzer/* ~/.codex/skills/rpa-ipa-analyzer/
-```
-
-Create `~/.codex/skills/rpa-ipa-analyzer/codex.yaml`:
-```yaml
-name: rpa-ipa-analyzer
-description: Analyze IPA Studio RPA projects
-entrypoint: SKILL.md
-runtime: python3
+cp SKILL.md ~/.codex/skills/rpa-ipa-analyzer/
+cp -r scripts/ ~/.codex/skills/rpa-ipa-analyzer/
+cp -r references/ ~/.codex/skills/rpa-ipa-analyzer/
+cp platforms/codex/codex.yaml ~/.codex/skills/rpa-ipa-analyzer/
 ```
 
 #### OpenClaw
 
-Place the skill in the OpenClaw skills directory:
-
 ```bash
 mkdir -p ~/.openclaw/skills/rpa-ipa-analyzer
-cp -r rpa-ipa-analyzer/* ~/.openclaw/skills/rpa-ipa-analyzer/
-```
-
-Create `~/.openclaw/skills/rpa-ipa-analyzer/skill.yaml`:
-```yaml
-name: rpa-ipa-analyzer
-version: 1.0.0
-entrypoint: SKILL.md
+cp SKILL.md ~/.openclaw/skills/rpa-ipa-analyzer/
+cp -r scripts/ ~/.openclaw/skills/rpa-ipa-analyzer/
+cp -r references/ ~/.openclaw/skills/rpa-ipa-analyzer/
+cp platforms/openclaw/skill.yaml ~/.openclaw/skills/rpa-ipa-analyzer/
 ```
 
 ---
@@ -143,25 +149,30 @@ python3 /path/to/rpa-ipa-analyzer/scripts/extract_nodes.py . --force
 
 ```
 rpa-ipa-analyzer/
-├── SKILL.md              # Main skill instructions (413 lines, full-featured)
-├── README.md             # This file
-├── LICENSE               # MIT License
-├── CHANGELOG.md           # Version history
-├── requirements.txt       # Python dependencies (stdlib only)
-├── .gitignore
+├── SKILL.md              # [CORE] Main skill instructions — all platforms need this
 ├── scripts/
-│   └── extract_nodes.py  # Code extraction utility (734 lines, full-featured)
+│   └── extract_nodes.py  # [CORE] Code extraction utility — all platforms need this
 ├── references/
-│   ├── ipa_format.md     # IPA Studio JSON format reference
-│   └── report_template.md # Report structure template
+│   ├── ipa_format.md     # [CORE] IPA Studio JSON format reference
+│   └── report_template.md # [CORE] Report structure template
+├── evals/
+│   └── evals.json        # [CLAUDE ONLY] Evaluation test cases (optional)
 ├── platforms/
 │   ├── codex/
-│   │   └── codex.yaml    # OpenAI Codex adapter
+│   │   └── codex.yaml    # [CODEX ONLY] Platform adapter
 │   └── openclaw/
-│       └── skill.yaml    # OpenClaw adapter
-└── evals/
-    └── evals.json        # Evaluation test cases
+│       └── skill.yaml    # [OPENCLAW ONLY] Platform adapter
+├── README.md             # [REPO ONLY] Project documentation — do NOT install
+├── LICENSE               # [REPO ONLY] MIT License — do NOT install
+├── CHANGELOG.md           # [REPO ONLY] Version history — do NOT install
+├── requirements.txt       # [REPO ONLY] Deps reference — do NOT install (no deps)
+└── .gitignore             # [REPO ONLY] Git config — do NOT install
 ```
+
+**Legend:**
+- `[CORE]` — Required by all platforms. Always copy these.
+- `[CLAUDE ONLY]` / `[CODEX ONLY]` / `[OPENCLAW ONLY]` — Platform-specific. Only copy for that platform.
+- `[REPO ONLY]` — Project metadata. Never copy for any platform installation.
 
 ---
 
