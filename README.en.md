@@ -12,6 +12,7 @@ This skill analyzes IPA Studio RPA projects and generates professional analysis 
 - End-to-end data lineage mapping
 - Risk assessment and optimization suggestions
 - Cross-project code deduplication
+- **6-Lens Parallel Code Audit** (security, performance, API contracts, error handling, testing gaps, documentation drift) → auto-generates `AUDIT_REPORT.md`
 
 ## Supported Project Types
 
@@ -111,9 +112,25 @@ python3 /path/to/rpa-ipa-analyzer/scripts/extract_nodes.py . --force
 #    "请分析当前这个 IPA Studio RPA 项目"
 ```
 
-**Output**: `分析报告_{项目名}.md` is generated in the project directory.
+**Output**: `分析报告_{项目名}.md` and `AUDIT_REPORT.md` are generated in the project directory.
 
 ### Example Output Structure
+
+```
+project_dir/
+├── 分析报告_{project_name}.md  # Main analysis report
+├── AUDIT_REPORT.md             # 6-lens parallel audit report
+├── audit_findings/              # Per-agent audit raw results
+│   ├── security.json
+│   ├── performance.json
+│   ├── api_contracts.json
+│   ├── error_handling.json
+│   ├── testing_gaps.json
+│   └── documentation_drift.json
+└── .extracted_nodes/            # Extracted code nodes
+```
+
+### Main Report Structure
 
 ```
 分析报告_MyProject.md
@@ -143,6 +160,17 @@ python3 /path/to/rpa-ipa-analyzer/scripts/extract_nodes.py . --force
     └── B. 节点索引
 ```
 
+### Audit Report Structure
+
+```
+AUDIT_REPORT.md
+├── 一、执行摘要 (Top 5 findings + severity counts)
+├── 二、文件问题热力图 (per-file × 6 audit lenses)
+├── 三、优先级排序问题列表 (Critical → Low)
+├── 四、修复工时估算 (by severity tier)
+└── 五、交叉引用索引 (pattern grouping)
+```
+
 ---
 
 ## Directory Structure
@@ -153,8 +181,10 @@ rpa-ipa-analyzer/
 ├── scripts/
 │   └── extract_nodes.py  # [CORE] Code extraction utility — all platforms need this
 ├── references/
-│   ├── ipa_format.md     # [CORE] IPA Studio JSON format reference
-│   └── report_template.md # [CORE] Report structure template
+│   ├── ipa_format.md     # [CORE] IPA Studio JSON format reference + component types
+│   ├── report_template.md # [CORE] Main report + audit report structure template
+│   ├── audit_swarm.md    # [CORE] Phase 8 parallel audit agent prompts
+│   └── design_patterns.md # [CORE] 14 RPA design patterns detail
 ├── evals/
 │   └── evals.json        # [CLAUDE ONLY] Evaluation test cases (optional)
 ├── platforms/
@@ -163,6 +193,7 @@ rpa-ipa-analyzer/
 │   └── openclaw/
 │       └── skill.yaml    # [OPENCLAW ONLY] Platform adapter
 ├── README.md             # [REPO ONLY] Project documentation — do NOT install
+├── README.en.md          # [REPO ONLY] Project documentation (EN) — do NOT install
 ├── LICENSE               # [REPO ONLY] MIT License — do NOT install
 ├── CHANGELOG.md           # [REPO ONLY] Version history — do NOT install
 ├── requirements.txt       # [REPO ONLY] Deps reference — do NOT install (no deps)
@@ -192,6 +223,17 @@ Detects identical code across multiple projects via MD5 hashing, enabling shared
 
 ### 14 RPA Design Patterns Documented
 From template-based Excel generation to CAPTCHA auto-recognition — recognized patterns are noted in the report automatically.
+
+### 6-Lens Parallel Code Audit (Phase 8)
+Automatically launches 6 parallel agents after analysis completes:
+- **Security**: Hardcoded secrets, eval/exec injection, path traversal
+- **Performance**: Blocking I/O, memory waste, pandas anti-patterns, win32com overhead
+- **API Contracts**: Function sig vs docstring, cross-node variable contracts, old version comparison
+- **Error Handling**: Bare except, swallowed exceptions, missing file checks, COM resource leaks
+- **Testing Gaps**: Zero coverage detection, complex function flags, dead code identification
+- **Documentation Drift**: @desc placeholders, ghost parameters, @tag misclassification
+
+Merge agent deduplicates findings and generates `AUDIT_REPORT.md` (executive summary, file heatmap, remediation hours estimate).
 
 ---
 

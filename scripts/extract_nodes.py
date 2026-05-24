@@ -23,6 +23,8 @@ Token savings: Instead of reading multi-MB JSON flow files (~250KB), subsequent
 analysis can read just the extracted .py/.js files (~32KB total for 5 nodes).
 """
 
+from __future__ import annotations
+
 import json
 import re
 import sys
@@ -255,7 +257,7 @@ def find_param(properties: list[dict], prop_type: str, param_id: str) -> Any:
     return None
 
 
-def extract_node_meta(node: dict, flow_path: str) -> dict | None:
+def extract_node_meta(node: dict, flow_path: str) -> Optional[dict]:
     """Extract metadata and code from a single JSON node. Returns None if not a code node."""
     component_id = node.get("component_id", "")
     node_id = node.get("id", "")
@@ -467,7 +469,7 @@ UI_COMPONENTS = {
 }
 
 
-def extract_ui_node_meta(node: dict, flow_path: str) -> dict | None:
+def extract_ui_node_meta(node: dict, flow_path: str) -> Optional[dict]:
     """Extract structured metadata from a UI automation node."""
     component_id = node.get("component_id", "")
     if component_id not in UI_COMPONENTS:

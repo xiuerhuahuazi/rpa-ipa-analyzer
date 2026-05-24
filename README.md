@@ -12,6 +12,7 @@
 - 端到端数据流向映射
 - 风险评估与优化建议
 - 跨项目代码去重
+- **6 维度并行代码审计**（安全/性能/API契约/错误处理/测试缺口/文档漂移）→ 自动生成 `AUDIT_REPORT.md`
 
 ## 支持的项目类型
 
@@ -111,9 +112,25 @@ python3 /path/to/rpa-ipa-analyzer/scripts/extract_nodes.py . --force
 #    "请分析当前这个 IPA Studio RPA 项目"
 ```
 
-**输出**：在项目目录中生成 `分析报告_{项目名}.md`。
+**输出**：在项目目录中生成 `分析报告_{项目名}.md` 和 `AUDIT_REPORT.md`。
 
 ### 报告输出结构示例
+
+```
+项目目录/
+├── 分析报告_{项目名}.md     # 主分析报告
+├── AUDIT_REPORT.md          # 6 维度并行审计报告
+├── audit_findings/           # 各 agent 审计原始结果
+│   ├── security.json
+│   ├── performance.json
+│   ├── api_contracts.json
+│   ├── error_handling.json
+│   ├── testing_gaps.json
+│   └── documentation_drift.json
+└── .extracted_nodes/         # 提取的代码节点
+```
+
+### 主报告结构
 
 ```
 分析报告_MyProject.md
@@ -143,6 +160,17 @@ python3 /path/to/rpa-ipa-analyzer/scripts/extract_nodes.py . --force
     └── B. 节点索引
 ```
 
+### 审计报告结构
+
+```
+AUDIT_REPORT.md
+├── 一、执行摘要 (Top 5 关键发现 + 严重程度统计)
+├── 二、文件问题热力图 (每个文件 × 6 个审计维度)
+├── 三、优先级排序问题列表 (Critical → Low)
+├── 四、修复工时估算 (按严重程度分项)
+└── 五、交叉引用索引 (相同模式链接)
+```
+
 ---
 
 ## 目录结构
@@ -153,8 +181,10 @@ rpa-ipa-analyzer/
 ├── scripts/
 │   └── extract_nodes.py  # [核心] 代码提取工具——所有平台必需
 ├── references/
-│   ├── ipa_format.md     # [核心] IPA Studio JSON 格式参考
-│   └── report_template.md # [核心] 报告结构模板
+│   ├── ipa_format.md     # [核心] IPA Studio JSON 格式参考 + 组件类型
+│   ├── report_template.md # [核心] 主报告 + 审计报告结构模板
+│   ├── audit_swarm.md    # [核心] Phase 8 并行审计 agent 完整 prompt
+│   └── design_patterns.md # [核心] 14 种 RPA 设计模式详细说明
 ├── evals/
 │   └── evals.json        # [仅 Claude Code] 评估测试用例（可选）
 ├── platforms/
@@ -193,6 +223,17 @@ rpa-ipa-analyzer/
 
 ### 14 种 RPA 设计模式
 从基于模板的 Excel 生成到验证码自动识别——识别到的设计模式将自动标注在报告中。
+
+### 6 维度并行代码审计 (Phase 8)
+分析报告完成后自动启动 6 个并行 agent，分别审计：
+- **安全**：硬编码密钥、eval/exec 注入、路径遍历
+- **性能**：阻塞 I/O、内存浪费、pandas 反模式、win32com 开销
+- **API 契约**：函数签名 vs docstring、跨节点变量契约、旧版本对比
+- **错误处理**：裸 except、吞异常、缺失文件检查、COM 资源泄漏
+- **测试缺口**：零测试覆盖、复杂函数检测、死代码识别
+- **文档漂移**：@desc 待补充、幽灵参数、@tag 误分类
+
+合并 agent 自动去重并生成 `AUDIT_REPORT.md`（含执行摘要、文件热力图、修复工时估算）。
 
 ---
 

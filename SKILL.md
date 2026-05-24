@@ -1,6 +1,6 @@
 ---
 name: rpa-ipa-analyzer
-description: Analyze IPA Studio RPA projects to produce comprehensive business and code analysis reports with Mermaid flowcharts. Use when the user asks to "analyze this RPA project", "understand this IPA Studio flow", "extract Python code from flow", "map the business logic", or "generate a RPA analysis report". Handles data-processing projects (Python/pandas) AND web automation projects (JavaScript injection, browser operations, UI element interaction), or mixed projects combining both. Supports hierarchical JSON flow files, embedded Python+JavaScript code extraction, global parameter mapping, and multi-project batch analysis.
+description: Analyze IPA Studio RPA projects to produce comprehensive business and code analysis reports with Mermaid flowcharts. Use when the user asks to "analyze this RPA project", "understand this IPA Studio flow", "extract Python code from flow", "map the business logic", "generate a RPA analysis report", or "audit this RPA project". Handles data-processing projects (Python/pandas) AND web automation projects (JavaScript injection, browser operations, UI element interaction), or mixed projects combining both. Supports hierarchical JSON flow files, embedded Python+JavaScript code extraction, global parameter mapping, multi-project batch analysis, and parallel 6-lens code audit swarm (security, performance, error handling, API contracts, testing gaps, documentation drift) with automated report merging.
 ---
 
 # IPA Studio RPA Project Analyzer
@@ -12,6 +12,8 @@ Produce professional, structured business-and-code analysis reports for IPA Stud
 - User says "analyze this RPA project" or "analyze this IPA Studio project"
 - User asks to "understand the flow", "map the business logic", "extract code from the flows"
 - User wants an "analysis report" for an RPA/automation project
+- User says "audit this RPA project", "code audit", "security review this flow", or "check code quality"
+- User wants a comprehensive audit after analysis (Phase 8 auto-triggers after report generation)
 
 ## Project Type Classification
 
@@ -268,6 +270,34 @@ Before declaring done, verify:
 - [ ] Risk matrix in Section 5
 - [ ] Complete node index in Appendix B
 - [ ] Node index seq numbers match `.extracted_nodes/manifest.json` seq numbers
+- [ ] Phase 8 parallel audit launched and completed
+- [ ] `audit_findings/` directory contains all 6 agent JSON files
+- [ ] `AUDIT_REPORT.md` generated with executive summary, heatmap, and remediation estimates
+
+### Phase 8: Parallel Code Audit (MANDATORY after report generation)
+
+After the main analysis report is generated, launch a 6-agent parallel audit swarm. Each agent targets `.extracted_nodes/` and writes findings to `{project_path}/audit_findings/<agent_name>.json`.
+
+The 6 audit lenses:
+1. **Security** — secrets, eval/exec, injection, path traversal, sanitization
+2. **Performance** — blocking I/O, memory, unbatched ops, pandas anti-patterns, win32com overhead
+3. **API Contracts** — function sig vs docstring, cross-node variable contracts, `_旧` breaking changes
+4. **Error Handling** — bare except, swallowed exceptions, missing file checks, COM leaks, div-by-zero
+5. **Testing Gaps** — coverage per module, complex untested functions, dead code (`_旧` nodes)
+6. **Documentation Drift** — `@desc` [待补充], ghost/phantom params, `@tag` misclassification
+
+**Launch**: All 6 agents simultaneously (one message, 6 Agent tool calls).
+
+**Merge**: When all 6 complete, launch a merge agent that reads all finding files → deduplicates → resolves severity conflicts → generates `{project_path}/AUDIT_REPORT.md` with:
+1. Executive Summary (top-5 findings + severity counts)
+2. Heatmap of Issues by File
+3. Prioritized Finding List
+4. Estimated Remediation Effort (hours)
+5. Cross-Reference Index
+
+**Full agent prompts and merge template**: See `references/audit_swarm.md`.
+
+**Audit report template**: See `references/report_template.md` Section "AUDIT_REPORT.md 模板".
 
 ---
 
@@ -289,49 +319,26 @@ For financial/accounting projects, verify these during Phase 3 analysis:
 
 ## Common RPA Design Patterns
 
-Recognize these patterns during analysis and note them in the report:
+Recognize these 14 patterns during analysis. Full descriptions in `references/design_patterns.md`.
 
-### Pattern 1: Template-Based Excel Generation
-Excel templates in `Resources/` with predefined formatting. Code uses openpyxl to open template → fill data → save as new file with dynamic name.
+| # | Pattern | Key Signal | Typical Scenario |
+|---|---------|------------|------------------|
+| 1 | Template-Based Excel | `openpyxl.load_workbook()` + cell fill + `save()` | Pre-formatted Excel output |
+| 2 | Multi-Source Merge | Multiple `pd.read_excel()` → `pd.merge()` chain | Data enrichment pipeline |
+| 3 | Dual-Mode (Browser vs API) | `if mode` branch → JS vs HTTP components | SSCM/China Mobile systems |
+| 4 | COA-Based Sheet Split | Sequential filter chains → multiple `to_excel()` | Financial report splitting |
+| 5 | Web Form Auto-Fill | JS `input.value =` + Excel-row-driven data | OA system automation |
+| 6 | SSCM Token + API | `StorageUtils` in JS → Bearer token → HTTP API | China Mobile integrations |
+| 7 | OCR CAPTCHA | `ddddocr` → `classify()` → form input | Government login bypass |
+| 8 | FTP Data Sync | `ftplib` → pandas upsert → FTP upload | Cross-system data sync |
+| 9 | Dual Notification | `email_smtp_send` + `send_message_other_network` | Result delivery |
+| 10 | Government API Cert | `requests.Session()` + `.gov.cn` + CAPTCHA | Certificate verification |
+| 11 | Offline Dep Install | `pip install` from local `.whl` | Air-gapped deployment |
+| 12 | CSS Cascading Form | `keyboard_text_input` → `mouse_click` → `keyboard` | OA cascading dropdowns |
+| 13 | UI Coordinate Click | `ui_get_target_location` → `pyautogui.click()` | Fallback automation |
+| 14 | Chrome Prefs Modify | `Chrome/Preferences` JSON + `taskkill` | Browser state reset |
 
-### Pattern 2: Multi-Source Merge Pipeline
-Load all data from multiple Excel files/sheets upfront → sequential left-join enrichment → final merge. Use `@dataclass` for loaded data container.
-
-### Pattern 3: Dual-Mode Operation (Browser vs API)
-Global parameter switches between browser automation and HTTP API. Browser mode needs JS token extraction; API mode needs pre-configured tokens.
-
-### Pattern 4: COA-Based Sheet Splitting
-Split data into sheets by COA (核算科目) priority rules: A → B → C → D → E. Each rule filters a subset; remainder passes to next rule.
-
-### Pattern 5: Web Form Auto-Fill (Data-Driven JS)
-Excel row → Python parsing → sequential JS injection per form field → submit. Shared JS nodes across 新增/修改/下架 sub-flows.
-
-### Pattern 6: SSCM Token Extraction + API Calling
-JS `sessionStorage` extraction (via `StorageUtils` wrapper class) → Python uses bearer_token for authenticated API calls. Browser mode uses JS-extracted tokens; headless mode needs pre-configured tokens. Common in China Mobile SSCM system integrations.
-
-### Pattern 7: OCR CAPTCHA Auto-Recognition
-Use `ddddocr` library to recognize CAPTCHA images from government/enterprise login pages → Python inputs the recognized text into login forms. Typically paired with proxy configuration for API access. Found in government certificate verification and logistics system login flows.
-
-### Pattern 8: FTP Data Synchronization
-Python FTP reads remote CSV/Excel → pandas upsert (insert-or-update by key columns) → FTP uploads updated data back. Uses `ftplib` with standard auth. Common in data sharing between RPA agents and central databases.
-
-### Pattern 9: Dual-Channel Notification (Email + SMS)
-Results delivered via SMTP email AND/or SMS (via `send_message_other_network` HTTP API). Different output channels for single vs batch query modes. SMS uses pre-registered message templates.
-
-### Pattern 10: Government API Certificate Verification
-Python HTTP requests to government public APIs (应急管理部 cx.mem.gov.cn, 住建部) for personnel certificate verification. Requires session cookie management, CAPTCHA handling, and proxy routing. Supports both single-query and batch-Excel modes.
-
-### Pattern 11: Offline Dependency Installation
-`pip install` from local `.whl` files in `Resources/` directory for air-gapped deployment environments. Python `subprocess` or `pip.main()` to install xlrd/xlwt/ddddocr offline. Used when RPA executor machines lack internet access.
-
-### Pattern 12: CSS Cascading Form Fill
-Sequential UI interaction: keyboard input → mouse click dropdown → keyboard select option. Used for Chinese enterprise OA systems with cascading form controls (一级/二级业务领域 selection). Requires coordinated `keyboard_text_input` → `mouse_single_click` → `keyboard_text_input` chains.
-
-### Pattern 13: UI Coordinate-Based Simulated Click
-`ui_get_target_location` captures element screen coordinates → Python `pyautogui.click(x, y)` performs the actual click. Used as fallback when direct UI automation selectors fail on complex dialogs or non-standard controls.
-
-### Pattern 14: Chrome Preferences Modification
-Python reads/writes Chrome's `Preferences` JSON file to disable popup dialogs, set download directories, and configure browser behavior before automation starts. Includes process kill (`taskkill /f /im chrome.exe`) and file permission changes (`os.chmod`). Used to ensure clean browser state for web automation.
+When a pattern is detected, note it in the node analysis and suggest optimization if applicable.
 
 ---
 
@@ -371,39 +378,8 @@ For multiple projects: spawn one Explore agent per project for Phase 1-2 in para
 
 ## Component Type Reference
 
-### Scripting (2 types)
-| component_id | Code Field | Purpose |
-|---|---|---|
-| `script_python_execute` | `python_script` | Python data processing |
-| `browser_inject_js_code` | `js_code` | JS injected into browser console |
-
-### Browser (7 types)
-`browser_attachment`, `browser_navigation`, `browser_load_wait`, `browser_refresh`, `browser_cookie_get`, `window_close`
-
-### UI Automation (12 types)
-`mouse_single_click`, `keyboard_text_input`, `keyboard_hot_send`, `ui_element_wait_show`, `ui_element_wait_vanish`, `ui_element_exist`, `interface_text_get`, `dialog_message_box`, `window_minimize`, `ui_get_target_location`, `mouse_wheel_scroll`, `app_user_interaction`
-
-### Flow Control (16 types)
-`process_start`, `log_task`, `sub_process`, `process_if`, `process_iterator`, `process_while`, `process_break`, `process_assignment`, `process_delay`, `process_retry`, `process_exception_catch`, `process_exception_throw`, `process_exception_throw_again`, `process_exception_termination`, `process_function_block`, `process_continue`
-
-### File & System (6 types)
-`file_list_get`, `file_output_result`, `file_delete`, `file_dir_delete`, `system_project_path_get`, `table_data_fetch`
-
-### Network & Data (4 types)
-`web_http_request`, `datatable_iterator`, `email_smtp_send`, `send_message_other_network`
-
-### Newly Added Types (from cross-project analysis)
-
-| component_id | Category | Purpose |
-|---|---|---|
-| `app_user_interaction` | UI Automation | 通用交互弹框（单选、多选、文本输入、文件上传、提示） |
-| `process_function_block` | Flow Control | 逻辑容器（内含完整嵌套子流程） |
-| `email_smtp_send` | Network & Data | SMTP 邮件发送（含附件） |
-| `send_message_other_network` | Network & Data | 异网短信发送（HTTP API + 消息模板） |
-| `table_data_fetch` | File & System | 浏览器表格数据抓取 |
-| `ui_get_target_location` | UI Automation | 获取 UI 元素坐标位置（配合 pyautogui） |
-| `mouse_wheel_scroll` | UI Automation | 模拟鼠标滚轮 |
-| `process_continue` | Flow Control | 循环中跳过当前迭代 |
-| `window_close` | Browser | 关闭浏览器窗口 |
-
-See `references/ipa_format.md` for detailed field extraction patterns for each type.
+See `references/ipa_format.md` for the complete component type catalog, including:
+- Scripting (2 types): `script_python_execute`, `browser_inject_js_code`
+- Browser (7 types), UI Automation (12 types), Flow Control (16 types)
+- File & System (6 types), Network & Data (4 types)
+- Extraction patterns for each type's code/config fields
