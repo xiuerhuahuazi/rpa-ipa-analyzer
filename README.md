@@ -10,6 +10,7 @@
 - 从 Python（`script_python_execute`）和 JavaScript（`browser_inject_js_code`）节点中提取代码
 - 业务逻辑解读与领域术语表
 - 端到端数据流向映射
+- **全局参数 Excel 输入文件追踪**：自动检测 `paramType: 8` 输入文件参数，追踪代码中读取的 Sheet 名称、数据起始行（`header`/`skiprows`）及列范围（`usecols`）
 - 风险评估与优化建议
 - 跨项目代码去重
 - **6 维度并行代码审计**（安全/性能/API契约/错误处理/测试缺口/文档漂移）→ 自动生成 `AUDIT_REPORT.md`
@@ -223,6 +224,14 @@ rpa-ipa-analyzer/
 
 ### 14 种 RPA 设计模式
 从基于模板的 Excel 生成到验证码自动识别——识别到的设计模式将自动标注在报告中。
+
+### 全局参数 Excel 输入文件深度追踪
+当 `globalParams.json` 中存在 `type: "输入文件"`（或 `globalParamsAll.json` 中 `paramType: 8`）且指向 `.xlsx`/`.xls` 文件时：
+- 自动追踪参数到实际读取节点
+- 提取 `pd.read_excel()` 的 `sheet_name`（第几个 Sheet / Sheet 名称）
+- 提取 `header`/`skiprows`（数据起始行位置）
+- 提取 `usecols`（读取的列范围）
+- 在报告 Section 3.1 和 4.5 中集中呈现
 
 ### 6 维度并行代码审计 (Phase 8)
 分析报告完成后自动启动 6 个并行 agent，分别审计：

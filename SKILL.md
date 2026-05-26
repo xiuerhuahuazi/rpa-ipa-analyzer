@@ -124,6 +124,19 @@ Read: {project_path}/globalParamsAll.json → Parameter schema (deployment templ
 
 **Output of this phase**: Complete process hierarchy tree, parameter inventory, component type list with counts.
 
+### Phase 1.1: Excel Input File Detection
+
+After reading `globalParams.json`, scan all parameters for Excel input files:
+
+- **Detection criteria**: `type: "输入文件"` (globalParams.json) or `paramType: 8` (globalParamsAll.json) AND the value/description references `.xlsx` or `.xls`
+- **For each Excel input file parameter found**, record:
+  - Parameter key (e.g., `IN_FILE`, `合同台账`)
+  - File name pattern (e.g., `合同台账.xlsx`)
+  - Parameter description
+  - This will be cross-referenced in Phase 3 to trace which sheet and start row the code uses
+
+These files are the primary data inputs — their sheet/row reading details must appear in the final report.
+
 ### Phase 2: Flow Structure Extraction
 
 For each JSON flow file (main + all sub-processes), extract:
@@ -191,7 +204,12 @@ This is the most important phase. For EVERY code-bearing node:
    - **Data structures**: all DataFrames, lists, dicts created
    - **Processing steps**: sequential operations with purpose
    - **Business rules**: filter conditions, exclusion lists, calculation formulas, priority logic
-   - **Excel I/O**: which Resources file is read/written, which sheet, which columns
+   - **Excel I/O**: which Resources file is read/written, which sheet, which columns.
+     **For global-param Excel input files (detected in Phase 1.1), MUST extract:**
+     - `sheet_name` parameter — if `None`/`0`, report as "第1个Sheet"; if string, report the exact sheet name
+     - `skiprows` / `header` — report the exact data start row (e.g., `header=1` → "第2行为表头，第3行起为数据")
+     - `usecols` — which columns are read
+     - If using `read_excel_advanced` wrapper, trace into its implementation to find the same parameters
    - **Error handling**: try/except blocks, null checks, boundary conditions
    - **Edge cases**: what happens on empty input, missing columns, type mismatches
 6. **Financial projects**: Verify money amounts use `Decimal` (not `float`), file paths use `pathlib.Path`
@@ -231,6 +249,8 @@ This connects code to business meaning. Must cover:
    - Decision logic trees（like 推荐操作 conditions）
 
 5. **Excel I/O mapping table**: Every file read or written, by which node, which sheet, which columns.
+   **For global-param Excel input files**: additionally report sheet name, data start row, and column range.
+   See Section 4.5 in report template for required format.
 
 ### Phase 6: Report Generation
 
@@ -262,6 +282,8 @@ Before declaring done, verify:
 - [ ] Every `script_python_execute` node analyzed individually in Section 2
 - [ ] Every `browser_inject_js_code` node analyzed (web projects)
 - [ ] All globalParams listed with usage locations in Section 3
+- [ ] Excel input file parameters (type: 输入文件 / paramType: 8) identified and tagged
+- [ ] For each Excel input file: sheet name, data start row, and column range documented in Sections 3.1 and 4.5
 - [ ] Complete data lineage diagram in Section 4
 - [ ] Business concept glossary in Section 4
 - [ ] Excel I/O mapping table in Section 4

@@ -10,6 +10,7 @@ This skill analyzes IPA Studio RPA projects and generates professional analysis 
 - Code extraction from Python (`script_python_execute`) and JavaScript (`browser_inject_js_code`) nodes
 - Business logic interpretation with domain glossary
 - End-to-end data lineage mapping
+- **Global param Excel input file tracing**: auto-detect `paramType: 8` input file parameters, trace code to identify which sheet is read, the data start row (`header`/`skiprows`), and column range (`usecols`)
 - Risk assessment and optimization suggestions
 - Cross-project code deduplication
 - **6-Lens Parallel Code Audit** (security, performance, API contracts, error handling, testing gaps, documentation drift) → auto-generates `AUDIT_REPORT.md`
@@ -223,6 +224,14 @@ Detects identical code across multiple projects via MD5 hashing, enabling shared
 
 ### 14 RPA Design Patterns Documented
 From template-based Excel generation to CAPTCHA auto-recognition — recognized patterns are noted in the report automatically.
+
+### Global Param Excel Input File Deep Tracing
+When `globalParams.json` has `type: "输入文件"` (or `globalParamsAll.json` has `paramType: 8`) pointing to `.xlsx`/`.xls` files:
+- Auto-traces the parameter to the actual reading code node
+- Extracts `sheet_name` from `pd.read_excel()` (sheet index or name)
+- Extracts `header`/`skiprows` (data start row position)
+- Extracts `usecols` (column range being read)
+- Reports consolidated in Sections 3.1 and 4.5 of the analysis report
 
 ### 6-Lens Parallel Code Audit (Phase 8)
 Automatically launches 6 parallel agents after analysis completes:

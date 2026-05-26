@@ -293,11 +293,20 @@ COMMON/*.json       → Infrastructure
 ```
 
 ### Parameter Type Codes (globalParamsAll.json)
-| Code | Type |
-|------|------|
-| 6 | 下拉单选 (dropdown) |
-| 8 | 输入文件 (input file) |
-| 10 | 字符串 (string) |
+| Code | Type | 说明 |
+|------|------|------|
+| 6 | 下拉单选 (dropdown) | 枚举选择参数 |
+| 8 | 输入文件 (input file) | **Excel 文件需额外关注**：分析时必须追踪代码中读取该文件的 sheet_name、header、skiprows、usecols 参数 |
+| 10 | 字符串 (string) | 文本/数字参数 |
+
+### Excel Input File Tracing
+
+When a parameter has `paramType: 8` (globalParamsAll.json) or `type: "输入文件"` (globalParams.json) and references a `.xlsx`/`.xls` file, the analysis MUST:
+
+1. Trace the parameter through input variable mappings to find which node(s) read it
+2. In the reading node's code, locate `pd.read_excel()` or `read_excel_advanced()` calls
+3. Extract and report: `sheet_name`, `header`/`skiprows`, `usecols`
+4. Report in Section 3.1 (parameter table) and Section 4.5 (Excel I/O mapping) of the analysis report
 
 ## Component Type Reference
 

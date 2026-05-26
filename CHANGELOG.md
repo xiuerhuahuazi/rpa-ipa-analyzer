@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0 (2026-05-26)
+
+- Excel input file sheet/row detection: when global params contain `paramType: 8` (输入文件) pointing to `.xlsx`/`.xls`, analysis now traces and reports `sheet_name`, `header`/`skiprows`, and `usecols` from `pd.read_excel()` calls
+- Enhanced report Section 3.1 with dedicated Excel input parameter sub-table (sheet, start row, column range, reading node)
+- Enhanced report Section 4.5 Excel I/O mapping table with "来源" and "数据起始行" columns
+- Added Phase 1.1: Excel Input File Detection step to analysis workflow
+- Added `ipa_format.md` section documenting the 4-step Excel input file tracing process
+
 ## 1.0.0 (2026-05-12)
 
 - IPA Studio RPA project analysis with Mermaid flowchart generation
