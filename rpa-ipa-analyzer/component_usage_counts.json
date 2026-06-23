@@ -1,0 +1,1282 @@
+{
+  "_schema": "1.0",
+  "components": {
+    "process_exception_catch": {
+      "count": 23,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "_exception_message_object",
+        "catch_node",
+        "finally_node",
+        "try_node"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-22",
+      "confidence": "high"
+    },
+    "process_iterator": {
+      "count": 16,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "_loop_datatable",
+        "_loop_row_data",
+        "loop_node"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "log_task": {
+      "count": 24,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "log_level",
+        "print_text"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "script_python_execute": {
+      "count": 23,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "EmailAttachments",
+        "EmailContent",
+        "EmailTitle",
+        "FilePathOne",
+        "SavePath",
+        "all_charts",
+        "author_name",
+        "awk_format",
+        "backup_file_name",
+        "backup_file_path",
+        "beforeFixedFileName",
+        "browser_download_path",
+        "caps_lock_on",
+        "chart_name",
+        "cluster",
+        "condition",
+        "current_week",
+        "data",
+        "data1",
+        "data2",
+        "data_cnki",
+        "data_cqvip",
+        "data_list",
+        "data_wanfang",
+        "df",
+        "df_employees",
+        "df_test",
+        "dirs",
+        "email_attachments",
+        "email_content",
+        "email_error",
+        "email_list",
+        "email_recipient",
+        "email_title",
+        "employees_file_path",
+        "error",
+        "error_array",
+        "excel_file",
+        "exist_files_in_browser_download_path",
+        "failed_list",
+        "fdir",
+        "file_list_state",
+        "file_name",
+        "file_name_new",
+        "file_path",
+        "filename",
+        "files",
+        "files_path_list",
+        "finish_time",
+        "fp",
+        "grouped_ip_configs",
+        "in_awk_format",
+        "in_config",
+        "in_ip",
+        "in_scan_results",
+        "in_wait_save_success_seconds",
+        "in_workpath",
+        "index",
+        "input_file",
+        "ip_address",
+        "is_exist",
+        "key_columns",
+        "last_folder",
+        "level_1",
+        "level_2",
+        "list",
+        "log_file",
+        "log_path",
+        "logger",
+        "merged_df",
+        "next_page",
+        "now",
+        "num_str",
+        "number",
+        "once_minute",
+        "out_file_path",
+        "out_path",
+        "out_scan_results",
+        "output",
+        "output_file_path",
+        "page",
+        "pageInfo",
+        "path",
+        "path_name",
+        "path_name_list",
+        "pending_email_item",
+        "person_array",
+        "process_error",
+        "result",
+        "result_data",
+        "result_text",
+        "save_folder_path",
+        "scan_results",
+        "selected_columns",
+        "status",
+        "succes_array",
+        "success_list",
+        "system_path",
+        "tab_nodes",
+        "task",
+        "task_type",
+        "text",
+        "time",
+        "time_end",
+        "time_start",
+        "tmp_data_cnki",
+        "today_file_path",
+        "upload_file_list",
+        "upload_file_path",
+        "wait_load_chart_time",
+        "workpath"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "sub_process": {
+      "count": 24,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "input_variables",
+        "output_variables",
+        "process_path"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "browser_open": {
+      "count": 11,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "_browser_auto_adapt",
+        "_browser_load_wait",
+        "_browser_load_wait_time",
+        "_browser_maximize",
+        "_clear_cookie",
+        "_close_browser_process",
+        "_execute_env",
+        "_process_interval",
+        "browser_single_sign",
+        "browser_single_sign_time",
+        "browser_type",
+        "browser_variable",
+        "control_server_url",
+        "open_url",
+        "over_time"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "browser_load_wait": {
+      "count": 16,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "over_time",
+        "rpa_browser"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "process_assignment": {
+      "count": 16,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "assignment_target_target",
+        "assignment_target_value"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "application_kill_process": {
+      "count": 9,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "name_or_id",
+        "process_name"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "file_write": {
+      "count": 1,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-22",
+      "sample_fields": [
+        "code",
+        "content",
+        "file_path",
+        "is_append"
+      ],
+      "sample_flow_path": "",
+      "promoted": false,
+      "promotion_date": null
+    },
+    "file_create": {
+      "count": 1,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-22",
+      "sample_fields": [
+        "file_name",
+        "path"
+      ],
+      "sample_flow_path": "",
+      "promoted": false,
+      "promotion_date": null
+    },
+    "keyboard_text_input": {
+      "count": 16,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "_browser_load_wait",
+        "_browser_load_wait_time",
+        "_click_mode",
+        "_coordinate_x",
+        "_coordinate_y",
+        "_driver_mode",
+        "_high_light",
+        "_input_interval",
+        "_input_mode",
+        "_move_mouse",
+        "_rpa_browser_s",
+        "content",
+        "content_type",
+        "cursor_position",
+        "element_type",
+        "interface_selector",
+        "mouse_type",
+        "need_offset",
+        "offset_x",
+        "offset_y",
+        "rpa_browser",
+        "waiting_time"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "mouse_single_click": {
+      "count": 22,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "_browser_load_wait",
+        "_browser_load_wait_time",
+        "_click_count",
+        "_click_interval_time",
+        "_coordinate_x",
+        "_coordinate_y",
+        "_high_light",
+        "_rpa_browser_s",
+        "click_type",
+        "cursor_position",
+        "element_selector",
+        "element_type",
+        "hot_keys",
+        "interface_selector",
+        "mouse_input_type",
+        "mouse_type",
+        "move_mouse",
+        "need_offset",
+        "offset_x",
+        "offset_y",
+        "over_time",
+        "rpa_browser",
+        "wait_timeout"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "table_data_fetch": {
+      "count": 10,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "columns",
+        "columns_header_contain",
+        "extract_data",
+        "metadata_selector",
+        "page_trun_num",
+        "page_trun_selector",
+        "page_trun_time",
+        "target_selector"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "process_if": {
+      "count": 24,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "conditions"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "browser_inject_js_code": {
+      "count": 23,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "Judgment_move_files_to_new_folder_2",
+        "after_modification_name",
+        "author",
+        "browser_object",
+        "change_name",
+        "chart_name",
+        "class_name",
+        "command_text",
+        "count",
+        "create_folder_name",
+        "data_cnki_length",
+        "deleted_file_count",
+        "elements_file_name_list",
+        "error_message",
+        "existence_index",
+        "existence_state",
+        "familyName",
+        "family_name",
+        "fileName",
+        "file_name",
+        "file_name_new",
+        "filename",
+        "findChart",
+        "first_img_name",
+        "first_panel_header_text",
+        "flag",
+        "floder_index",
+        "folderName",
+        "folder_name",
+        "folder_name_new",
+        "found_levl_1",
+        "get_family_name",
+        "get_photo_album_name",
+        "group_index",
+        "has_table",
+        "hrefs",
+        "img_index",
+        "img_list",
+        "img_name",
+        "index",
+        "index_list",
+        "isTrue",
+        "is_file_list",
+        "is_findDatasource",
+        "is_query",
+        "is_same_document",
+        "is_same_music",
+        "is_song_playing",
+        "journal",
+        "journal_date",
+        "last_family_name",
+        "level_1",
+        "level_2",
+        "list",
+        "loadingText",
+        "login_wrapper",
+        "name",
+        "new_family_name",
+        "new_length",
+        "new_nick_name",
+        "next_page",
+        "notFindChartCount",
+        "num",
+        "old_length",
+        "page",
+        "pageHeight",
+        "pageInfo",
+        "pageLoadStatus",
+        "path_name_list",
+        "photo_album",
+        "photo_album1",
+        "prompt",
+        "randomDocument",
+        "randomFiles",
+        "randomImage",
+        "randomIndex",
+        "randomMusic",
+        "randomVideo",
+        "randomZip",
+        "rate_col",
+        "recycle_filename",
+        "recycle_result",
+        "result",
+        "resultMessage",
+        "result_message",
+        "result_move_success",
+        "shareGroupName",
+        "shareName",
+        "sharing_img_state",
+        "stock_col",
+        "suffix",
+        "tab_nodes",
+        "target_folder",
+        "test_folder_name",
+        "text",
+        "title",
+        "upload_file",
+        "upload_file_list",
+        "uplod_error",
+        "uplod_state"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "browser_attachment": {
+      "count": 17,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "_browser_auto_adapt",
+        "_browser_maximize",
+        "_component_update_version",
+        "browser_type",
+        "browser_variable",
+        "over_time"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "browser_tag_switch": {
+      "count": 13,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "match_content",
+        "match_target",
+        "rpa_browser"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "process_delay": {
+      "count": 16,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "delay_time"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "process_while": {
+      "count": 15,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "loop_condition",
+        "loop_node",
+        "loop_type"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "browser_refresh": {
+      "count": 13,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "_browser_load_wait",
+        "_browser_load_wait_time",
+        "rpa_browser"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "browser_tag_create": {
+      "count": 11,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "_browser_load_wait",
+        "_browser_load_wait_time",
+        "open_url",
+        "rpa_browser"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "browser_tag_close": {
+      "count": 10,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "rpa_browser"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "list_add_data": {
+      "count": 9,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "new_list",
+        "src_list",
+        "value"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "browser_info_get": {
+      "count": 1,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-22",
+      "sample_fields": [
+        "browser_info_title",
+        "browser_info_url",
+        "rpa_browser"
+      ],
+      "sample_flow_path": "",
+      "promoted": false,
+      "promotion_date": null
+    },
+    "email_smtp_send": {
+      "count": 2,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-22",
+      "sample_fields": [
+        "_body_type",
+        "_need_proxy",
+        "_proxy_type",
+        "attachments",
+        "body",
+        "carbon_copy",
+        "host",
+        "login_name",
+        "login_password",
+        "port",
+        "receivers",
+        "timeout",
+        "topic"
+      ],
+      "sample_flow_path": "",
+      "promoted": false,
+      "promotion_date": null
+    },
+    "datetime_now": {
+      "count": 12,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "_datetime_define_pattern",
+        "datetime_now_result",
+        "datetime_now_type"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "excel_open_or_create": {
+      "count": 10,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "excel_object",
+        "file_path",
+        "visible"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "excel_close": {
+      "count": 3,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-22",
+      "sample_fields": [
+        "excel_object",
+        "is_close_process",
+        "is_save",
+        "visible"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23"
+    },
+    "excel_range_write": {
+      "count": 2,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-22",
+      "sample_fields": [
+        "excel_object",
+        "is_save",
+        "range_data",
+        "sheet_name",
+        "start_cell_location",
+        "visible"
+      ],
+      "sample_flow_path": "",
+      "promoted": false,
+      "promotion_date": null
+    },
+    "dialog_message_box": {
+      "count": 12,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "button_pressed",
+        "button_set",
+        "content",
+        "title"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "browser_maximize": {
+      "count": 5,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "rpa_browser"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "ui_element_wait_show": {
+      "count": 15,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "rpa_browser",
+        "waiting_time",
+        "window_indicator"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "keyboard_hot_send": {
+      "count": 15,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "hot_keys",
+        "other_key",
+        "run_count",
+        "waiting_time",
+        "window_indicator"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "window_close": {
+      "count": 5,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "name_or_id",
+        "waiting_time",
+        "window_indicator"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "process_retry": {
+      "count": 5,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "retry_count",
+        "retry_node",
+        "retry_time",
+        "retry_tips"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "ui_single_dropdown_box": {
+      "count": 5,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "include_element",
+        "waiting_time",
+        "window_indicator"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "process_exception_throw": {
+      "count": 15,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "exception_throw_info"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "interface_text_get": {
+      "count": 13,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "_high_light",
+        "_over_time",
+        "content_type",
+        "element_type",
+        "interface_selector",
+        "result_text_name",
+        "rpa_browser"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "clipboard_get": {
+      "count": 5,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "clipboard_text"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "ui_target_exist": {
+      "count": 9,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "time_out",
+        "uee_select_element",
+        "window_indicator"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "system_project_path_get": {
+      "count": 2,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-22",
+      "sample_fields": [
+        "output_project_path_name"
+      ],
+      "sample_flow_path": "",
+      "promoted": false,
+      "promotion_date": null
+    },
+    "full_screen_shot": {
+      "count": 9,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "save_file_path"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "mouse_wheel_scroll": {
+      "count": 1,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-22",
+      "sample_fields": [
+        "_scroll_direction",
+        "_scroll_lines"
+      ],
+      "sample_flow_path": "",
+      "promoted": false,
+      "promotion_date": null
+    },
+    "file_delete": {
+      "count": 10,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "file_path"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "clipboard_set": {
+      "count": 1,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-22",
+      "sample_fields": [
+        "text"
+      ],
+      "sample_flow_path": "",
+      "promoted": false,
+      "promotion_date": null
+    },
+    "ui_element_exist": {
+      "count": 13,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "rpa_browser",
+        "time_out",
+        "uee_select_element",
+        "window_indicator"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "browser_download_path_get": {
+      "count": 9,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "browser_download_path_name",
+        "browser_type",
+        "rpa_browser"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "file_list_get": {
+      "count": 9,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "_dir_source_path",
+        "_file_list_object"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "excel_cell_write": {
+      "count": 8,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "cell_data",
+        "cell_location",
+        "excel_object",
+        "is_save",
+        "sheet_name",
+        "visible"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "excel_save": {
+      "count": 8,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "excel_object",
+        "save_method",
+        "visible"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "excel_range_read": {
+      "count": 1,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-22",
+      "sample_fields": [
+        "excel_object",
+        "range_all",
+        "range_data",
+        "sheet_name",
+        "visible"
+      ],
+      "sample_flow_path": "",
+      "promoted": false,
+      "promotion_date": null
+    },
+    "excel_sheet_rename": {
+      "count": 1,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-22",
+      "sample_fields": [
+        "excel_object",
+        "is_save",
+        "new_sheet_name",
+        "old_sheet_name",
+        "visible"
+      ],
+      "sample_flow_path": "",
+      "promoted": false,
+      "promotion_date": null
+    },
+    "excel_sheet_names": {
+      "count": 1,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-22",
+      "sample_fields": [
+        "excel_object",
+        "sheet_names",
+        "visible"
+      ],
+      "sample_flow_path": "",
+      "promoted": false,
+      "promotion_date": null
+    },
+    "file_copy": {
+      "count": 1,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-22",
+      "sample_fields": [
+        "dst_dir",
+        "is_overwrite",
+        "src_file_name"
+      ],
+      "sample_flow_path": "",
+      "promoted": false,
+      "promotion_date": null
+    },
+    "file_output_result": {
+      "count": 5,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "file_output_result_source_list"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "log_console": {
+      "count": 1,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-22",
+      "sample_fields": [
+        "print_text"
+      ],
+      "sample_flow_path": "",
+      "promoted": false,
+      "promotion_date": null
+    },
+    "file_is_exist": {
+      "count": 13,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "file_exist_result",
+        "file_path"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "browser_back": {
+      "count": 8,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "rpa_browser"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "browser_load_correct": {
+      "count": 8,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "rpa_browser"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "mouse_move": {
+      "count": 8,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "_coordinate_x",
+        "_coordinate_y",
+        "_high_light",
+        "cursor_position",
+        "element_type",
+        "interface_selector",
+        "need_offset",
+        "offset_x",
+        "offset_y",
+        "over_time"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "excel_cell_img": {
+      "count": 7,
+      "first_seen": "2026-06-23",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "cell_reference",
+        "excel_object",
+        "image_height",
+        "image_path",
+        "image_width",
+        "is_save",
+        "sheet_name",
+        "visible"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "ui_element_get_attribute": {
+      "count": 7,
+      "first_seen": "2026-06-23",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "attr_name",
+        "out_value",
+        "waiting_time",
+        "window_indicator"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "log_screenshot": {
+      "count": 4,
+      "first_seen": "2026-06-23",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "screenshot_file_name"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "process_exception_termination": {
+      "count": 4,
+      "first_seen": "2026-06-23",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "exception_termination_info",
+        "termination_type"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "file_create_dir": {
+      "count": 4,
+      "first_seen": "2026-06-23",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "base_dir",
+        "new_dir_name"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "get_system_variable": {
+      "count": 4,
+      "first_seen": "2026-06-23",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "veriable_name",
+        "veriable_value"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "datetime_day_diff": {
+      "count": 4,
+      "first_seen": "2026-06-23",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "days_diff",
+        "time_str_first",
+        "time_str_second"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "string_contain": {
+      "count": 4,
+      "first_seen": "2026-06-23",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "input_character",
+        "input_value",
+        "sc_boolean"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "string_length": {
+      "count": 4,
+      "first_seen": "2026-06-23",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "string_length_input",
+        "string_length_output"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "window_append": {
+      "count": 4,
+      "first_seen": "2026-06-23",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "name_or_id",
+        "waiting_time",
+        "window_append_object",
+        "window_indicator"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "datetime_days_ago": {
+      "count": 4,
+      "first_seen": "2026-06-23",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "date_choose",
+        "days_off",
+        "dst_date_str"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    },
+    "unknown_component_test": {
+      "count": 6,
+      "first_seen": "2026-06-23",
+      "last_seen": "2026-06-23",
+      "sample_fields": [
+        "custom_field_a",
+        "custom_field_b",
+        "result_field"
+      ],
+      "sample_flow_path": "",
+      "promoted": true,
+      "promotion_date": "2026-06-23",
+      "confidence": "high"
+    }
+  }
+}

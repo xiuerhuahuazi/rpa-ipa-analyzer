@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
+*.bak
 
 # Virtual environments
 venv/
@@ -22,6 +23,13 @@ Thumbs.db
 # Extracted nodes (runtime output)
 .extracted_nodes/
 
+# Cache
+.version_check_cache
+
 # Temp files
 *.tmp
 *.log
+
+# Design docs (internal, not for distribution)
+designs/
+docs/

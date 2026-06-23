@@ -1,0 +1,20 @@
+{
+  "version": "1.0",
+  "strategy": "any_domain",
+  "strategies": {
+    "any_domain": {
+      "description": "任一域的 count >= threshold 即可 promotion",
+      "threshold_per_domain": 3
+    },
+    "global_only": {
+      "description": "只看 global 域",
+      "threshold": 3
+    },
+    "cross_domain": {
+      "description": "至少 2 个域各有 count >= 2",
+      "min_domains": 2,
+      "min_count_per_domain": 2
+    }
+  },
+  "confidence_min_for_promotion": "medium"
+}

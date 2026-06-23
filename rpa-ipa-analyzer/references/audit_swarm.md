@@ -1,6 +1,10 @@
 # Parallel Code Audit Swarm — Agent Prompts
 
-Detailed agent prompts for Phase 8 parallel audit. Launch all 6 agents simultaneously, then run the merge agent.
+> **触发方式**: 由 `SKILL_audit.md` 中的 `/rpa-ipa-audit` 命令调用（对应 SKILL.md v3.0.0 的层 3.3）。
+> **前置条件**: `.extracted_nodes/manifest.json` 及对应 `.py`/`.js` 文件必须存在。
+> **输入约定**: 每个 agent 首先读取 `{project_path}/.extracted_nodes/manifest.json` 获取节点索引，然后通过 manifest 中的 `file` 字段定位读取脚本文件。
+
+Detailed agent prompts for the parallel audit swarm. Launch all 6 agents simultaneously, then run the merge agent.
 
 ## Agent 1: Security Auditor
 

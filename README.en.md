@@ -1,6 +1,6 @@
-# rpa-ipa-analyzer
+# rpa-ipa-analyzer v3.0.0
 
-Analyze IPA Studio RPA projects to produce comprehensive business and code analysis reports with Mermaid flowcharts.
+Analyze IPA Studio RPA projects to produce comprehensive business and code analysis reports with Mermaid flowcharts. Supports three depth levels (quick/standard/deep) with auto-detection.
 
 ## Overview
 
@@ -10,10 +10,23 @@ This skill analyzes IPA Studio RPA projects and generates professional analysis 
 - Code extraction from Python (`script_python_execute`) and JavaScript (`browser_inject_js_code`) nodes
 - Business logic interpretation with domain glossary
 - End-to-end data lineage mapping
-- **Global param Excel input file tracing**: auto-detect `paramType: 8` input file parameters, trace code to identify which sheet is read, the data start row (`header`/`skiprows`), and column range (`usecols`)
+- **Variable lineage tracing**: `extract_nodes.py trace` subcommand with BFS on edges graph
+- **Design pattern matching**: 5 universal patterns with checklist-based detection
 - Risk assessment and optimization suggestions
 - Cross-project code deduplication
-- **6-Lens Parallel Code Audit** (security, performance, API contracts, error handling, testing gaps, documentation drift) → auto-generates `AUDIT_REPORT.md`
+- **6-Lens Parallel Code Audit** (security, performance, API contracts, error handling, testing gaps, documentation drift) as independent `/rpa-ipa-audit` command
+- **Auto-generated `@desc`**: extracted code files include meaningful descriptions instead of `[待补充]` placeholders
+- **Adaptive component promotion**: cross-project usage tracking auto-upgrades heuristic components in `ipa_format.md`
+
+## v3.0.0 Highlights
+
+- **4-Layer Capability Model**: Phase 0 (self-calibration) -> Layer 1 (project modeling) -> Layer 2 (code & business analysis) -> Layer 3 (artifact generation). Cleaner than the old 7-Phase linear model.
+- **Three Depth Levels**: quick (overview only, no extract_nodes run) / standard (full analysis, default) / deep (includes 6-lens audit). Natural language + auto-scale detection.
+- **Edges Collection**: `extract_nodes.py` now extracts `graphData.edges[]` into `manifest.json`, enabling the `trace` subcommand for variable lineage tracking.
+- **Modular Extractor**: `extract_nodes.py` split from a single 581-line file into 10 focused modules under `_extract/`, with CLI subcommands (extract/list/stats/trace/compare).
+- **Independent Audit Command**: `/rpa-ipa-audit` as opt-in heavy operation -- zero overhead on default analysis path.
+- **Component Confidence System**: every component in `component_usage_counts.json` tagged with confidence (low/medium/high) plus cleanup suggestions for stale entries.
+- **Regression Test Framework**: golden manifest diff + structured assertions, 50/50 evals pass.
 
 ## Supported Project Types
 
@@ -23,261 +36,81 @@ This skill analyzes IPA Studio RPA projects and generates professional analysis 
 | **Web Automation** | Browser interaction, JS injection | `browser_inject_js_code`, `mouse_single_click` |
 | **Mixed** | Combines both patterns | Multiple component types |
 
----
-
 ## Installation
 
 ### Prerequisites
 
 - **Python 3.8+** (standard library only, no pip install required)
 - IPA Studio project files (`project.json`, flow JSON files)
-- One of the supported AI coding platforms (see [Platform Setup](#platform-setup))
+- One of the supported AI coding platforms
 
-### Step 1: Clone the Repository
+### Claude Code
 
 ```bash
 git clone https://github.com/xiuerhuahuazi/rpa-ipa-analyzer.git
-```
-
-### Step 2: Platform Setup
-
-> **Important:** This repo contains files for multiple platforms plus repo metadata. Only copy the files your platform actually needs. The table below shows what's required per platform.
-
-#### What to Copy (Per Platform)
-
-| File | Claude Code | OpenAI Codex | OpenClaw |
-|------|:-----------:|:------------:|:--------:|
-| `SKILL.md` | ✅ Required | ✅ Required | ✅ Required |
-| `scripts/` | ✅ Required | ✅ Required | ✅ Required |
-| `references/` | ✅ Required | ✅ Required | ✅ Required |
-| `evals/` | ✅ Optional | ❌ Not needed | ❌ Not needed |
-| `platforms/codex/` | ❌ Not needed | ✅ Required | ❌ Not needed |
-| `platforms/openclaw/` | ❌ Not needed | ❌ Not needed | ✅ Required |
-| `README.md` | ❌ Not needed | ❌ Not needed | ❌ Not needed |
-| `LICENSE` | ❌ Not needed | ❌ Not needed | ❌ Not needed |
-| `CHANGELOG.md` | ❌ Not needed | ❌ Not needed | ❌ Not needed |
-| `.gitignore` | ❌ Not needed | ❌ Not needed | ❌ Not needed |
-| `requirements.txt` | ❌ Not needed | ❌ Not needed | ❌ Not needed |
-
-Repo-only files (`README.md`, `LICENSE`, `CHANGELOG.md`, `.gitignore`, `requirements.txt`) are project metadata — they are not used by any platform at runtime and should be excluded from skill installation.
-
-#### Claude Code
-
-```bash
-# Copy only the essential files:
+cd rpa-ipa-analyzer
 mkdir -p ~/.claude/skills/rpa-ipa-analyzer
-cp SKILL.md ~/.claude/skills/rpa-ipa-analyzer/
-cp -r scripts/ ~/.claude/skills/rpa-ipa-analyzer/
-cp -r references/ ~/.claude/skills/rpa-ipa-analyzer/
-cp -r evals/ ~/.claude/skills/rpa-ipa-analyzer/   # optional
+cp -r rpa-ipa-analyzer/* ~/.claude/skills/rpa-ipa-analyzer/
+mkdir -p ~/.claude/skills/rpa-ipa-update
+cp rpa-ipa-update/SKILL.md ~/.claude/skills/rpa-ipa-update/
 ```
 
-Verify installation:
-```bash
-ls ~/.claude/skills/rpa-ipa-analyzer/SKILL.md
-```
-
-#### OpenAI Codex
-
-```bash
-mkdir -p ~/.codex/skills/rpa-ipa-analyzer
-cp SKILL.md ~/.codex/skills/rpa-ipa-analyzer/
-cp -r scripts/ ~/.codex/skills/rpa-ipa-analyzer/
-cp -r references/ ~/.codex/skills/rpa-ipa-analyzer/
-cp platforms/codex/codex.yaml ~/.codex/skills/rpa-ipa-analyzer/
-```
-
-#### OpenClaw
-
-```bash
-mkdir -p ~/.openclaw/skills/rpa-ipa-analyzer
-cp SKILL.md ~/.openclaw/skills/rpa-ipa-analyzer/
-cp -r scripts/ ~/.openclaw/skills/rpa-ipa-analyzer/
-cp -r references/ ~/.openclaw/skills/rpa-ipa-analyzer/
-cp platforms/openclaw/skill.yaml ~/.openclaw/skills/rpa-ipa-analyzer/
-```
-
----
-
-## Quick Start
+### Quick Start
 
 ```bash
 # 1. Navigate to an IPA Studio project
 cd /path/to/your-ipa-project
 
-# 2. Run the extraction script to prepare code nodes
-python3 /path/to/rpa-ipa-analyzer/scripts/extract_nodes.py . --force
+# 2. Extract code nodes
+python3 path/to/extract_nodes.py extract . --force
 
-# 3. Trigger the skill in Claude Code (or your platform)
-#    In Claude Code, just say:
-#    "请分析当前这个 IPA Studio RPA 项目"
+# 3. Trigger skill in Claude Code:
+#    "/rpa-ipa-analyzer --depth standard ."  (full analysis)
+#    "/rpa-ipa-analyzer --depth quick ."     (architecture overview)
+#    "/rpa-ipa-analyzer --depth deep ."      (with 6-lens audit)
+#    "/rpa-ipa-audit ."                      (audit only)
 ```
-
-**Output**: `分析报告_{项目名}.md` and `AUDIT_REPORT.md` are generated in the project directory.
-
-### Example Output Structure
-
-```
-project_dir/
-├── 分析报告_{project_name}.md  # Main analysis report
-├── AUDIT_REPORT.md             # 6-lens parallel audit report
-├── audit_findings/              # Per-agent audit raw results
-│   ├── security.json
-│   ├── performance.json
-│   ├── api_contracts.json
-│   ├── error_handling.json
-│   ├── testing_gaps.json
-│   └── documentation_drift.json
-└── .extracted_nodes/            # Extracted code nodes
-```
-
-### Main Report Structure
-
-```
-分析报告_MyProject.md
-├── 一、整体工作流分析
-│   ├── 1.1 项目架构概览 (Mermaid flowchart)
-│   ├── 1.2 主流程完整路径
-│   ├── 1.3 条件分支与路由逻辑
-│   └── 1.4 子流程调用关系
-├── 二、节点级详细拆解
-│   ├── 2.1 阶段划分与概述
-│   ├── 2.2 代码节点逐一详解 (per-node analysis)
-│   └── 2.3 UI 自动化节点分析
-├── 三、全局参数与配置分析
-├── 四、业务逻辑深度解读
-│   ├── 4.1 整体业务目标
-│   ├── 4.2 核心业务概念 (domain glossary)
-│   ├── 4.3 数据流转全路径 (ASCII diagram)
-│   ├── 4.4 核心业务规则与计算公式
-│   └── 4.5 Excel 读写完整映射
-├── 五、综合分析
-│   ├── 5.1 组件使用统计与洞察
-│   ├── 5.2 优缺点分析
-│   ├── 5.3 优化建议
-│   └── 5.4 潜在风险点
-└── 附录
-    ├── A. 项目文件清单
-    └── B. 节点索引
-```
-
-### Audit Report Structure
-
-```
-AUDIT_REPORT.md
-├── 一、执行摘要 (Top 5 findings + severity counts)
-├── 二、文件问题热力图 (per-file × 6 audit lenses)
-├── 三、优先级排序问题列表 (Critical → Low)
-├── 四、修复工时估算 (by severity tier)
-└── 五、交叉引用索引 (pattern grouping)
-```
-
----
 
 ## Directory Structure
 
 ```
 rpa-ipa-analyzer/
-├── SKILL.md              # [CORE] Main skill instructions — all platforms need this
-├── scripts/
-│   └── extract_nodes.py  # [CORE] Code extraction utility — all platforms need this
-├── references/
-│   ├── ipa_format.md     # [CORE] IPA Studio JSON format reference + component types
-│   ├── report_template.md # [CORE] Main report + audit report structure template
-│   ├── audit_swarm.md    # [CORE] Phase 8 parallel audit agent prompts
-│   └── design_patterns.md # [CORE] 14 RPA design patterns detail
-├── evals/
-│   └── evals.json        # [CLAUDE ONLY] Evaluation test cases (optional)
-├── platforms/
-│   ├── codex/
-│   │   └── codex.yaml    # [CODEX ONLY] Platform adapter
-│   └── openclaw/
-│       └── skill.yaml    # [OPENCLAW ONLY] Platform adapter
-├── README.md             # [REPO ONLY] Project documentation — do NOT install
-├── README.en.md          # [REPO ONLY] Project documentation (EN) — do NOT install
-├── LICENSE               # [REPO ONLY] MIT License — do NOT install
-├── CHANGELOG.md           # [REPO ONLY] Version history — do NOT install
-├── requirements.txt       # [REPO ONLY] Deps reference — do NOT install (no deps)
-└── .gitignore             # [REPO ONLY] Git config — do NOT install
+├── README.md / README.en.md    # Documentation
+├── CHANGELOG.md                 # Version history
+├── LICENSE                      # MIT
+├── rpa-ipa-analyzer/            # Full analysis skill
+│   ├── SKILL.md                 # Main instructions (v3.0.0 4-layer model)
+│   ├── SKILL_audit.md           # Independent audit command
+│   ├── VERSION                   # 3.0.0
+│   ├── component_usage_counts.json  # Cross-project component stats
+│   ├── promotion_config.json    # Promotion strategy config
+│   ├── scripts/
+│   │   ├── extract_nodes.py     # CLI entry (extract/list/stats/trace/compare)
+│   │   ├── component_promotion.py
+│   │   ├── version_check.py
+│   │   └── _extract/            # 10-module extraction library
+│   ├── references/
+│   │   ├── ipa_format.md        # 40+ component field definitions
+│   │   ├── report_template.md   # Report template (quick/deep annotated)
+│   │   ├── audit_swarm.md       # 6-agent parallel audit prompts
+│   │   ├── patterns_universal.md  # 5 universal design patterns (checklist format)
+│   │   └── patterns_domain.md     # Domain reference cases
+│   └── evals/
+│       ├── evals.json
+│       ├── assertions.py
+│       ├── evals_runner.py
+│       └── golden/baseline_project/
+├── rpa-ipa-update/              # Incremental update skill
+│   └── SKILL.md                 # v3.0.0 synced (variable change detection)
+└── platforms/                   # Platform adapters
+    ├── codex/codex.yaml
+    └── openclaw/skill.yaml
 ```
-
-**Legend:**
-- `[CORE]` — Required by all platforms. Always copy these.
-- `[CLAUDE ONLY]` / `[CODEX ONLY]` / `[OPENCLAW ONLY]` — Platform-specific. Only copy for that platform.
-- `[REPO ONLY]` — Project metadata. Never copy for any platform installation.
-
----
-
-## Key Features
-
-### Functional Tagging System
-Automatically classifies code nodes as BOILERPLATE, SKELETON, GLUE, or BUSINESS — avoiding redundant re-analysis of infrastructure code.
-
-### JavaScript Injection Classification
-Classifies every `browser_inject_js_code` node into one of 7 categories: DOM Navigation, Form Fill, Form Read, State Detection, Data Extraction, Page Cleanup, Button Click.
-
-### Recursive Block Traversal
-Extracts code nodes from nested `process_function_block` structures up to 3 levels deep.
-
-### Cross-Project Deduplication
-Detects identical code across multiple projects via MD5 hashing, enabling shared infrastructure identification.
-
-### 14 RPA Design Patterns Documented
-From template-based Excel generation to CAPTCHA auto-recognition — recognized patterns are noted in the report automatically.
-
-### Global Param Excel Input File Deep Tracing
-When `globalParams.json` has `type: "输入文件"` (or `globalParamsAll.json` has `paramType: 8`) pointing to `.xlsx`/`.xls` files:
-- Auto-traces the parameter to the actual reading code node
-- Extracts `sheet_name` from `pd.read_excel()` (sheet index or name)
-- Extracts `header`/`skiprows` (data start row position)
-- Extracts `usecols` (column range being read)
-- Reports consolidated in Sections 3.1 and 4.5 of the analysis report
-
-### 6-Lens Parallel Code Audit (Phase 8)
-Automatically launches 6 parallel agents after analysis completes:
-- **Security**: Hardcoded secrets, eval/exec injection, path traversal
-- **Performance**: Blocking I/O, memory waste, pandas anti-patterns, win32com overhead
-- **API Contracts**: Function sig vs docstring, cross-node variable contracts, old version comparison
-- **Error Handling**: Bare except, swallowed exceptions, missing file checks, COM resource leaks
-- **Testing Gaps**: Zero coverage detection, complex function flags, dead code identification
-- **Documentation Drift**: @desc placeholders, ghost parameters, @tag misclassification
-
-Merge agent deduplicates findings and generates `AUDIT_REPORT.md` (executive summary, file heatmap, remediation hours estimate).
-
----
 
 ## Requirements
 
-- Python 3.8+ (standard library only — `json`, `re`, `hashlib`, `pathlib`, `argparse`)
-- IPA Studio project files: `project.json`, flow JSON files, `globalParams.json`, `processResult.json`
-
----
-
-## Troubleshooting
-
-| Problem | Solution |
-|---------|----------|
-| `project.json not found` | Ensure you're running from the IPA Studio project root directory |
-| `Flow file not found` | Check `process_list` paths in `project.json` — files must exist relative to project root |
-| JSON decode error | IPA Studio exports UTF-8 JSON. Check file encoding is not GBK/GB2312 |
-| Large file (4MB+) slow | The skill uses parallel Explore agents for large files. Ensure sufficient context window |
-| `.extracted_nodes/` stale | Run `extract_nodes.py --force` to regenerate after flow file changes |
-| Python version too old | Requires Python 3.8+ for `pathlib` and type hints |
-| Skill not triggering | Verify SKILL.md is in the correct platform skills directory |
-
----
-
-## Compatibility
-
-| Platform | Status | Notes |
-|----------|--------|-------|
-| **Claude Code** | ✅ Native | YAML frontmatter format supported directly |
-| **OpenAI Codex** | ⚠️ Requires adapter | See [Codex setup](#openai-codex) — needs `codex.yaml` |
-| **OpenClaw** | ⚠️ Requires adapter | See [OpenClaw setup](#openclaw) — needs `skill.yaml` |
-
-The core analysis logic (`extract_nodes.py` + report templates) is platform-agnostic. Only the skill registration mechanism differs between platforms.
-
----
+- Python 3.8+ (stdlib only: `json`, `re`, `hashlib`, `pathlib`, `argparse`, `dataclasses`, `collections.deque`)
+- IPA Studio project files (`project.json`, flow JSON, `globalParams.json`, `processResult.json`)
 
 ## License
 
