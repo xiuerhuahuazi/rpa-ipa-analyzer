@@ -12,7 +12,7 @@ Claude Code / OpenAI Codex / OpenClaw 通用的 IPA Studio RPA 项目分析与�
 
 **典型工作流**：首次用 `rpa-ipa-analyzer` 生成完整报告 → 后续代码修改用 `rpa-ipa-update` 局部更新 → 发布前用 `rpa-ipa-audit` 审计。
 
-## v3.0.0 新特性
+## 新特性
 
 - **能力分层模型**：分析流程从 7 个 Phase 升级为 4 个能力层（层0自校准→层1项目建模→层2代码与业务分析→层3产物生成），依赖语义更清晰
 - **三级分析深度**：quick（宏观架构）/ standard（完整分析）/ deep（含 6 维并行审计），自动判定项目规模并推荐深度
