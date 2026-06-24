@@ -33,13 +33,11 @@ jobs:
 
       - name: Verify extract_nodes.py subcommand stubs
         run: |
-          python scripts/extract_nodes.py --help
-        working-directory: rpa-ipa-analyzer
+          python rpa-ipa-analyzer/scripts/extract_nodes.py --help
 
       - name: Run evals
         run: |
-          python evals/evals_runner.py --all
-        working-directory: rpa-ipa-analyzer
+          python rpa-ipa-analyzer/evals/evals_runner.py --all
 
   syntax-check:
     runs-on: ubuntu-latest
