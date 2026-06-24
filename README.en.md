@@ -1,4 +1,4 @@
-# rpa-ipa-analyzer v3.0.0
+# rpa-ipa-analyzer
 
 Analyze IPA Studio RPA projects to produce comprehensive business and code analysis reports with Mermaid flowcharts. Supports three depth levels (quick/standard/deep) with auto-detection.
 
@@ -18,7 +18,7 @@ This skill analyzes IPA Studio RPA projects and generates professional analysis 
 - **Auto-generated `@desc`**: extracted code files include meaningful descriptions instead of `[待补充]` placeholders
 - **Adaptive component promotion**: cross-project usage tracking auto-upgrades heuristic components in `ipa_format.md`
 
-## v3.0.0 Highlights
+## Highlights
 
 - **4-Layer Capability Model**: Phase 0 (self-calibration) -> Layer 1 (project modeling) -> Layer 2 (code & business analysis) -> Layer 3 (artifact generation). Cleaner than the old 7-Phase linear model.
 - **Three Depth Levels**: quick (overview only, no extract_nodes run) / standard (full analysis, default) / deep (includes 6-lens audit). Natural language + auto-scale detection.
@@ -79,9 +79,9 @@ rpa-ipa-analyzer/
 ├── CHANGELOG.md                 # Version history
 ├── LICENSE                      # MIT
 ├── rpa-ipa-analyzer/            # Full analysis skill
-│   ├── SKILL.md                 # Main instructions (v3.0.0 4-layer model)
+│   ├── SKILL.md                 # Main instructions ( 4-layer model)
 │   ├── SKILL_audit.md           # Independent audit command
-│   ├── VERSION                   # 3.0.0
+│   ├── VERSION                   
 │   ├── component_usage_counts.json  # Cross-project component stats
 │   ├── promotion_config.json    # Promotion strategy config
 │   ├── scripts/
@@ -101,7 +101,7 @@ rpa-ipa-analyzer/
 │       ├── evals_runner.py
 │       └── golden/baseline_project/
 ├── rpa-ipa-update/              # Incremental update skill
-│   └── SKILL.md                 # v3.0.0 synced (variable change detection)
+│   └── SKILL.md                 # synced (variable change detection)
 └── platforms/                   # Platform adapters
     ├── codex/codex.yaml
     └── openclaw/skill.yaml
