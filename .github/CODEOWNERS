@@ -1,0 +1,24 @@
+# Code Owners — 代码审查自动分配
+# 最后更新: 2026-06-24
+
+# 核心技能文件
+rpa-ipa-analyzer/SKILL.md          @xiuerhuahuazi
+rpa-ipa-analyzer/SKILL_audit.md    @xiuerhuahuazi
+rpa-ipa-update/SKILL.md            @xiuerhuahuazi
+
+# 提取引擎 (10 模块 + CLI 入口)
+rpa-ipa-analyzer/scripts/extract_nodes.py           @xiuerhuahuazi
+rpa-ipa-analyzer/scripts/_extract/                  @xiuerhuahuazi
+
+# 关键配置
+rpa-ipa-analyzer/component_usage_counts.json  @xiuerhuahuazi
+rpa-ipa-analyzer/promotion_config.json        @xiuerhuahuazi
+
+# 参考文件 (格式定义 + 报告模板)
+rpa-ipa-analyzer/references/         @xiuerhuahuazi
+
+# 测试框架
+rpa-ipa-analyzer/evals/              @xiuerhuahuazi
+
+# CI 与发布
+.github/                             @xiuerhuahuazi

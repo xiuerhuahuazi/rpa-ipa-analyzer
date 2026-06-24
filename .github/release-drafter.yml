@@ -1,0 +1,99 @@
+# Release Drafter configuration
+# 参考: https://github.com/release-drafter/release-drafter
+
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+
+categories:
+  - title: '💥 破坏性变更 Breaking Changes'
+    labels:
+      - 'breaking'
+  - title: '✨ 新功能 Added'
+    labels:
+      - 'feature'
+      - 'enhancement'
+  - title: '🔧 改进 Changed'
+    labels:
+      - 'refactor'
+      - 'docs'
+  - title: '🐛 修复 Fixed'
+    labels:
+      - 'bug'
+      - 'fix'
+  - title: '🗑️ 移除 Removed'
+    labels:
+      - 'removed'
+  - title: '🧰 维护 Maintenance'
+    labels:
+      - 'build'
+      - 'ci'
+      - 'test'
+      - 'chore'
+
+# 按 CHANGELOG.md 格式对齐：Breaking → Added → Changed → Fixed → Removed
+category-template: '### $TITLE'
+change-template: '- $TITLE (#$NUMBER) @$AUTHOR'
+
+version-resolver:
+  major:
+    labels:
+      - 'breaking'
+  minor:
+    labels:
+      - 'feature'
+      - 'enhancement'
+  patch:
+    labels:
+      - 'bug'
+      - 'fix'
+      - 'build'
+      - 'ci'
+      - 'chore'
+      - 'refactor'
+      - 'docs'
+      - 'test'
+      - 'removed'
+  default: patch
+
+template: |
+  # v$RESOLVED_VERSION ($DATE)
+
+  $CHANGES
+
+  ---
+
+  **完整更新日志**: [CHANGELOG.md]($REPOSITORY_URL/blob/main/CHANGELOG.md)
+
+  ## 安装
+
+  ```bash
+  git clone https://github.com/xiuerhuahuazi/rpa-ipa-analyzer.git
+  cd rpa-ipa-analyzer
+
+  # Claude Code
+  mkdir -p ~/.claude/skills/rpa-ipa-analyzer
+  cp -r rpa-ipa-analyzer/* ~/.claude/skills/rpa-ipa-analyzer/
+  mkdir -p ~/.claude/skills/rpa-ipa-update
+  cp rpa-ipa-update/SKILL.md ~/.claude/skills/rpa-ipa-update/
+  ```
+
+autolabeler:
+  - label: 'breaking'
+    title:
+      - '/^break(ing)?[:(!\s]/i'
+      - '/^[A-Z].*!:/'
+    branch:
+      - '/^breaking/i'
+  - label: 'feature'
+    title:
+      - '/^feat[:(!\s]/i'
+      - '/^add[:(!\s]/i'
+  - label: 'bug'
+    title:
+      - '/^fix[:(!\s]/i'
+      - '/^bug[:(!\s]/i'
+  - label: 'docs'
+    title:
+      - '/^docs?[:(!\s]/i'
+    files:
+      - '**/*.md'

@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+    paths-ignore:
+      - '**.md'
+      - 'designs/**'
+      - 'docs/**'
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'designs/**'
+      - 'docs/**'
+  workflow_dispatch:
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+      fail-fast: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Verify extract_nodes.py subcommand stubs
+        run: |
+          python scripts/extract_nodes.py --help
+        working-directory: rpa-ipa-analyzer
+
+      - name: Run evals
+        run: |
+          python evals/evals_runner.py --all
+        working-directory: rpa-ipa-analyzer
+
+  syntax-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check Python syntax (all .py files)
+        run: |
+          find . -name '*.py' -print0 | while IFS= read -r -d '' f; do
+            python -m py_compile "$f" && echo "OK: $f"
+          done
