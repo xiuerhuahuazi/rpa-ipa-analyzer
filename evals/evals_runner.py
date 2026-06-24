@@ -8,7 +8,25 @@ SKILL_DIR = SCRIPT_DIR.parent
 BASELINE = SCRIPT_DIR / "golden" / "baseline_project"
 GOLDEN_MANIFEST = BASELINE / "golden_manifest.json"
 COUNTS_FILE = SKILL_DIR / "component_usage_counts.json"
-EXTRACT_SCRIPT = SKILL_DIR / "scripts" / "extract_nodes.py"
+def _find_extract_script():
+    """自发现 extract_nodes.py，适配不同的仓库嵌套结构。"""
+    import os as _os
+    roots = [
+        SCRIPT_DIR.parent,                        # evals/.. (repo root fallback)
+        SCRIPT_DIR.parent / "rpa-ipa-analyzer",   # rpa-ipa-analyzer/rpa-ipa-analyzer/scripts/
+    ]
+    for root in roots:
+        for dirpath, _, filenames in _os.walk(str(root)):
+            for fn in filenames:
+                if fn == "extract_nodes.py":
+                    # 排除 golden baseline 下可能存在的 extracted_nodes 残留
+                    if ".extracted_nodes" not in dirpath:
+                        return Path(dirpath) / fn
+    # 最后的 fallback
+    return SCRIPT_DIR.parent / "scripts" / "extract_nodes.py"
+
+EXTRACT_SCRIPT = _find_extract_script()
+print(f"[evals_runner] Using extract_nodes.py at: {EXTRACT_SCRIPT}", file=sys.stderr)
 
 
 def run_extract(force=True):
