@@ -13,7 +13,7 @@ EXTRACT_SCRIPT = SKILL_DIR / "scripts" / "extract_nodes.py"
 
 def run_extract(force=True):
     result = subprocess.run(
-        ["python.exe", str(EXTRACT_SCRIPT), "extract", str(BASELINE)] + (["--force"] if force else []),
+        [sys.executable, str(EXTRACT_SCRIPT), "extract", str(BASELINE)] + (["--force"] if force else []),
         capture_output=True, text=True, timeout=120, cwd=str(SKILL_DIR)
     )
     return BASELINE / ".extracted_nodes" / "manifest.json"
