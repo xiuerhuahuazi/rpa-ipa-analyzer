@@ -9,20 +9,27 @@ BASELINE = SCRIPT_DIR / "golden" / "baseline_project"
 GOLDEN_MANIFEST = BASELINE / "golden_manifest.json"
 COUNTS_FILE = SKILL_DIR / "component_usage_counts.json"
 def _find_extract_script():
-    """自发现 extract_nodes.py，适配不同的仓库嵌套结构。"""
+    """自发现 extract_nodes.py — 优先 CI 环境变量，再自动搜索。"""
     import os as _os
+    # CI 传入的精确路径优先
+    env_path = _os.environ.get("EXTRACT_NODES_PATH", "")
+    if env_path and Path(env_path).exists():
+        return Path(env_path)
+    # 自动搜索
     roots = [
-        SCRIPT_DIR.parent,                        # evals/.. (repo root fallback)
-        SCRIPT_DIR.parent / "rpa-ipa-analyzer",   # rpa-ipa-analyzer/rpa-ipa-analyzer/scripts/
+        SCRIPT_DIR.parent,                        # evals/.. (repo root)
+        SCRIPT_DIR.parent / "rpa-ipa-analyzer",   # monorepo nested
+        SCRIPT_DIR.parent.parent,                  # evals/../.. (if evals inside nested)
     ]
     for root in roots:
+        if not root.exists():
+            continue
         for dirpath, _, filenames in _os.walk(str(root)):
             for fn in filenames:
                 if fn == "extract_nodes.py":
-                    # 排除 golden baseline 下可能存在的 extracted_nodes 残留
                     if ".extracted_nodes" not in dirpath:
                         return Path(dirpath) / fn
-    # 最后的 fallback
+    # fallback
     return SCRIPT_DIR.parent / "scripts" / "extract_nodes.py"
 
 EXTRACT_SCRIPT = _find_extract_script()

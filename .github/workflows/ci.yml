@@ -65,12 +65,19 @@ jobs:
 
       - name: Run evals
         run: |
+          EXTRACT_NODES=$(find "${GITHUB_WORKSPACE}" -maxdepth 4 -name 'extract_nodes.py' -type f -not -path '*/.extracted_nodes/*' -print -quit)
           EVALS_RUNNER=$(find "${GITHUB_WORKSPACE}" -maxdepth 4 -name 'evals_runner.py' -type f -print -quit)
+          if [ -z "$EXTRACT_NODES" ]; then
+            echo "FATAL: extract_nodes.py not found anywhere in workspace"
+            exit 1
+          fi
           if [ -z "$EVALS_RUNNER" ]; then
             echo "FATAL: evals_runner.py not found anywhere in workspace"
             exit 1
           fi
-          echo "Found: $EVALS_RUNNER"
+          echo "EXTRACT_NODES_PATH=$EXTRACT_NODES"
+          echo "Found evals_runner: $EVALS_RUNNER"
+          export EXTRACT_NODES_PATH="$EXTRACT_NODES"
           python "$EVALS_RUNNER" --all
 
   syntax-check:
