@@ -33,11 +33,31 @@ jobs:
 
       - name: Verify extract_nodes.py subcommand stubs
         run: |
-          python rpa-ipa-analyzer/scripts/extract_nodes.py --help
+          if [ -f scripts/extract_nodes.py ]; then
+            python scripts/extract_nodes.py --help
+          elif [ -f rpa-ipa-analyzer/scripts/extract_nodes.py ]; then
+            python rpa-ipa-analyzer/scripts/extract_nodes.py --help
+          else
+            echo "ERROR: extract_nodes.py not found. Listing root:"
+            ls -la
+            echo "--- Recursive ---"
+            ls -R
+            exit 1
+          fi
 
       - name: Run evals
         run: |
-          python rpa-ipa-analyzer/evals/evals_runner.py --all
+          if [ -f evals/evals_runner.py ]; then
+            python evals/evals_runner.py --all
+          elif [ -f rpa-ipa-analyzer/evals/evals_runner.py ]; then
+            python rpa-ipa-analyzer/evals/evals_runner.py --all
+          else
+            echo "ERROR: evals_runner.py not found. Listing root:"
+            ls -la
+            echo "--- Recursive ---"
+            ls -R
+            exit 1
+          fi
 
   syntax-check:
     runs-on: ubuntu-latest
