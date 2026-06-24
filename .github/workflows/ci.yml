@@ -45,6 +45,24 @@ jobs:
             exit 1
           fi
 
+      - name: Prepare golden baseline extracted nodes
+        run: |
+          if [ -f evals/golden/baseline_project/.extracted_nodes/manifest.json ]; then
+            echo 'Golden manifest already present, skipping generation.'
+            exit 0
+          fi
+          echo 'Generating extracted nodes for golden baseline...'
+          if [ -f scripts/extract_nodes.py ]; then
+            python scripts/extract_nodes.py extract evals/golden/baseline_project --force
+            ls -la evals/golden/baseline_project/.extracted_nodes/
+          elif [ -f rpa-ipa-analyzer/scripts/extract_nodes.py ]; then
+            python rpa-ipa-analyzer/scripts/extract_nodes.py extract rpa-ipa-analyzer/evals/golden/baseline_project --force
+            ls -la rpa-ipa-analyzer/evals/golden/baseline_project/.extracted_nodes/
+          else
+            echo 'ERROR: extract_nodes.py not found, cannot prepare golden manifest.'
+            exit 1
+          fi
+
       - name: Run evals
         run: |
           if [ -f evals/evals_runner.py ]; then

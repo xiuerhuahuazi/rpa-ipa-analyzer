@@ -16,7 +16,14 @@ def run_extract(force=True):
         [sys.executable, str(EXTRACT_SCRIPT), "extract", str(BASELINE)] + (["--force"] if force else []),
         capture_output=True, text=True, timeout=120, cwd=str(SKILL_DIR)
     )
-    return BASELINE / ".extracted_nodes" / "manifest.json"
+    manifest_path = BASELINE / ".extracted_nodes" / "manifest.json"
+    if result.returncode != 0 or not manifest_path.exists():
+        import sys as _s
+        print(f"FATAL: extract_nodes.py failed to produce {manifest_path}", file=_s.stderr)
+        print("STDOUT:", result.stdout, file=_s.stderr)
+        print("STDERR:", result.stderr, file=_s.stderr)
+        _s.exit(1)
+    return manifest_path
 
 
 def cmd_all():

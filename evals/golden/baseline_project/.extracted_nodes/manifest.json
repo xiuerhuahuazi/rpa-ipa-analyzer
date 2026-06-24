@@ -1,0 +1,238 @@
+{
+  "project": "EVAL_BASELINE_PROJECT",
+  "extracted_at": "2026-06-23",
+  "total_nodes": 10,
+  "stats": {
+    "py_nodes": 3,
+    "js_nodes": 1,
+    "heuristic_nodes": 6,
+    "ui_nodes": 0,
+    "total_code_lines": 13,
+    "duplicate_groups": 0,
+    "duplicate_nodes": 0
+  },
+  "duplicates": {},
+  "edges": [
+    {
+      "sourceNode": "node_start",
+      "targetNode": "node_python_001",
+      "source": "start",
+      "target": "entry",
+      "flow_file": "主流程.json"
+    },
+    {
+      "sourceNode": "node_python_001",
+      "targetNode": "node_if_001",
+      "source": "output",
+      "target": "entry",
+      "flow_file": "主流程.json"
+    },
+    {
+      "sourceNode": "node_if_001",
+      "targetNode": "node_sub_001",
+      "source": "true_branch",
+      "target": "entry",
+      "flow_file": "主流程.json"
+    },
+    {
+      "sourceNode": "node_if_001",
+      "targetNode": "node_log_001",
+      "source": "false_branch",
+      "target": "entry",
+      "flow_file": "主流程.json"
+    },
+    {
+      "sourceNode": "node_sub_001",
+      "targetNode": "node_js_001",
+      "source": "output",
+      "target": "entry",
+      "flow_file": "主流程.json"
+    },
+    {
+      "sourceNode": "sub_start",
+      "targetNode": "sub_python_001",
+      "source": "start",
+      "target": "entry",
+      "flow_file": "子流程.json"
+    }
+  ],
+  "nodes": [
+    {
+      "seq": 1,
+      "node_id": "node_python_001",
+      "show_name": "数据清洗",
+      "file": "N1_主流程_数据清洗.py",
+      "flow_file": "主流程.json",
+      "component": "script_python_execute",
+      "input_vars": {
+        "file_path": "C:/data/input.xlsx",
+        "out_path": "C:/data/output.xlsx"
+      },
+      "output_vars": {
+        "df": "DataFrame"
+      },
+      "code_hash": "e5036c3530dfb0f9431b3ee56f25a1c0",
+      "code_lines": 5,
+      "parent_block": "",
+      "extraction_method": "structured"
+    },
+    {
+      "seq": 2,
+      "node_id": "node_js_001",
+      "show_name": "页面元素提取",
+      "file": "N2_主流程_页面元素提取.js",
+      "flow_file": "主流程.json",
+      "component": "browser_inject_js_code",
+      "input_vars": {},
+      "output_vars": {
+        "result": "string"
+      },
+      "code_hash": "4c0cae2429b2e76acfd894e68a233ab7",
+      "code_lines": 2,
+      "parent_block": "",
+      "extraction_method": "structured"
+    },
+    {
+      "seq": 3,
+      "node_id": "node_if_001",
+      "show_name": "根据条件判断",
+      "file": "N3_主流程_根据条件判断.heuristic.json",
+      "flow_file": "主流程.json",
+      "component": "process_if",
+      "input_vars": {
+        "conditions": "<list: 1 items>"
+      },
+      "output_vars": {},
+      "code_hash": "",
+      "code_lines": 0,
+      "parent_block": "",
+      "extraction_method": "heuristic"
+    },
+    {
+      "seq": 4,
+      "node_id": "node_sub_001",
+      "show_name": "执行子流程",
+      "file": "N4_主流程_执行子流程.heuristic.json",
+      "flow_file": "主流程.json",
+      "component": "sub_process",
+      "input_vars": {
+        "process_path": "./子流程.json",
+        "input_variables": "<dict: 1 keys>",
+        "output_variables": "<dict: 1 keys>"
+      },
+      "output_vars": {},
+      "code_hash": "",
+      "code_lines": 0,
+      "parent_block": "",
+      "extraction_method": "heuristic"
+    },
+    {
+      "seq": 5,
+      "node_id": "node_exception_001",
+      "show_name": "处理异常",
+      "file": "N5_主流程_处理异常.heuristic.json",
+      "flow_file": "主流程.json",
+      "component": "process_exception_catch",
+      "input_vars": {
+        "try_node": "node_python_001",
+        "catch_node": "node_log_001"
+      },
+      "output_vars": {},
+      "code_hash": "",
+      "code_lines": 0,
+      "parent_block": "",
+      "extraction_method": "heuristic"
+    },
+    {
+      "seq": 6,
+      "node_id": "node_log_001",
+      "show_name": "打印业务日志",
+      "file": "N6_主流程_打印业务日志.heuristic.json",
+      "flow_file": "主流程.json",
+      "component": "log_task",
+      "input_vars": {
+        "print_text": "处理完成",
+        "log_level": "info"
+      },
+      "output_vars": {},
+      "code_hash": "",
+      "code_lines": 0,
+      "parent_block": "",
+      "extraction_method": "heuristic"
+    },
+    {
+      "seq": 7,
+      "node_id": "node_unknown_001",
+      "show_name": "测试未知组件",
+      "file": "N7_主流程_测试未知组件.heuristic.json",
+      "flow_file": "主流程.json",
+      "component": "unknown_component_test",
+      "input_vars": {
+        "custom_field_a": "valueA",
+        "custom_field_b": "42"
+      },
+      "output_vars": {
+        "result_field": "ok"
+      },
+      "code_hash": "",
+      "code_lines": 0,
+      "parent_block": "",
+      "extraction_method": "heuristic"
+    },
+    {
+      "seq": 8,
+      "node_id": "node_ui_001",
+      "show_name": "单击鼠标",
+      "file": "N8_主流程_单击鼠标.heuristic.json",
+      "flow_file": "主流程.json",
+      "component": "mouse_single_click",
+      "input_vars": {
+        "element_selector": "#login-button",
+        "click_type": "left",
+        "wait_timeout": "5000"
+      },
+      "output_vars": {},
+      "code_hash": "",
+      "code_lines": 0,
+      "parent_block": "",
+      "extraction_method": "heuristic"
+    },
+    {
+      "seq": 9,
+      "node_id": "block_node_py",
+      "show_name": "块内Python",
+      "file": "N9_主流程_功能块_块内Python.py",
+      "flow_file": "主流程.json::功能块",
+      "component": "script_python_execute",
+      "input_vars": {
+        "path": "C:/data"
+      },
+      "output_vars": {
+        "files": "list"
+      },
+      "code_hash": "ff3384de3605cb28c818b3eb593b0f5e",
+      "code_lines": 3,
+      "parent_block": "功能块",
+      "extraction_method": "structured"
+    },
+    {
+      "seq": 10,
+      "node_id": "sub_python_001",
+      "show_name": "子流程数据处理",
+      "file": "N10_子流程_子流程数据处理.py",
+      "flow_file": "子流程.json",
+      "component": "script_python_execute",
+      "input_vars": {
+        "input_file": "data.xlsx"
+      },
+      "output_vars": {
+        "df": "DataFrame"
+      },
+      "code_hash": "07a6c627e528b4593e35b7e96cded7bb",
+      "code_lines": 3,
+      "parent_block": "",
+      "extraction_method": "structured"
+    }
+  ],
+  "_schema_version": "2.0"
+}

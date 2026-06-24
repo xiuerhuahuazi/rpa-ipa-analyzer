@@ -22,6 +22,7 @@ Thumbs.db
 
 # Extracted nodes (runtime output)
 .extracted_nodes/
+!evals/golden/baseline_project/.extracted_nodes/
 
 # Cache
 .version_check_cache
