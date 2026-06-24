@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+    paths-ignore:
+      - '**.md'
+      - 'designs/**'
+      - 'docs/**'
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'designs/**'
+      - 'docs/**'
+  workflow_dispatch:
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+      fail-fast: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Debug - locate key files
+        run: |
+          echo "PWD: $(pwd)"
+          echo "GITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
+          echo "--- Top-level ---"
+          ls -la "${GITHUB_WORKSPACE}"
+          echo "--- Searching for extract_nodes.py ---"
+          find "${GITHUB_WORKSPACE}" -maxdepth 4 -name 'extract_nodes.py' -type f -print || true
+          echo "--- Searching for evals_runner.py ---"
+          find "${GITHUB_WORKSPACE}" -maxdepth 4 -name 'evals_runner.py' -type f -print || true
+
+      - name: Verify extract_nodes.py subcommand stubs
+        run: |
+          EXTRACT_NODES=$(find "${GITHUB_WORKSPACE}" -maxdepth 4 -name 'extract_nodes.py' -type f -print -quit)
+          if [ -z "$EXTRACT_NODES" ]; then
+            echo "FATAL: extract_nodes.py not found anywhere in workspace"
+            exit 1
+          fi
+          echo "Found: $EXTRACT_NODES"
+          python "$EXTRACT_NODES" --help
+
+      - name: Prepare golden baseline extracted nodes
+        run: |
+          if [ -f "${GITHUB_WORKSPACE}/evals/golden/baseline_project/.extracted_nodes/manifest.json" ]; then
+            echo 'Golden manifest already present, skipping generation.'
+            exit 0
+          fi
+          EXTRACT_NODES=$(find "${GITHUB_WORKSPACE}" -maxdepth 4 -name 'extract_nodes.py' -type f -print -quit)
+          echo 'Generating extracted nodes for golden baseline...'
+          python "$EXTRACT_NODES" extract "${GITHUB_WORKSPACE}/evals/golden/baseline_project" --force
+          ls -la "${GITHUB_WORKSPACE}/evals/golden/baseline_project/.extracted_nodes/"
+
+      - name: Run evals
+        run: |
+          EXTRACT_NODES=$(find "${GITHUB_WORKSPACE}" -maxdepth 4 -name 'extract_nodes.py' -type f -not -path '*/.extracted_nodes/*' -print -quit)
+          EVALS_RUNNER=$(find "${GITHUB_WORKSPACE}" -maxdepth 4 -name 'evals_runner.py' -type f -print -quit)
+          if [ -z "$EXTRACT_NODES" ]; then
+            echo "FATAL: extract_nodes.py not found anywhere in workspace"
+            exit 1
+          fi
+          if [ -z "$EVALS_RUNNER" ]; then
+            echo "FATAL: evals_runner.py not found anywhere in workspace"
+            exit 1
+          fi
+          echo "EXTRACT_NODES_PATH=$EXTRACT_NODES"
+          echo "Found evals_runner: $EVALS_RUNNER"
+          export EXTRACT_NODES_PATH="$EXTRACT_NODES"
+          python "$EVALS_RUNNER" --all
+
+  syntax-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check Python syntax (all .py files)
+        run: |
+          find . -name '*.py' -print0 | while IFS= read -r -d '' f; do
+            python -m py_compile "$f" && echo "OK: $f"
+          done

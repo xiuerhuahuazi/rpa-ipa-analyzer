@@ -14,7 +14,7 @@ def safe_name(text: str, max_len: int = 20) -> str:
 
 
 def flow_shortname(path: str) -> str:
-    name = path.replace("\\", "/").removesuffix(".json")
+    name = path.replace("\\", "/").replace(".json", "")
     name = name.replace("/", "_").replace(".", "_")
     name = name.replace("cw_通用_", "")
     return name
