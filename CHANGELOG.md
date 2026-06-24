@@ -1,5 +1,23 @@
 # Changelog
 
+## 3.0.1 (2026-06-24)
+
+### Added
+- **`.github/` CI/CD 基础设施**：GitHub Actions CI（Python 3.8–3.12 矩阵 + evals + 语法检查）、Release Drafter 自动发布草案
+- **Issue/PR 模板**：中文 Bug 报告模板、功能请求模板、PR 模板（含破坏性变更检查清单）
+- **CODEOWNERS**：核心文件审查自动分配
+
+### Fixed
+- **Python 3.8 兼容**：`core.py` 中 `str.removesuffix()` → `str.replace()`（3.8 不支持 removesuffix）
+- **CI 路径适配**：使用 `find` 自发现脚本路径 + `GITHUB_WORKSPACE` 环境变量，不再硬编码路径
+- **跨平台支持**：`evals_runner.py` 中 `python.exe` → `sys.executable`
+
+### Changed
+- **`.gitignore`**：允许 `evals/golden/baseline_project/.extracted_nodes/` 入库，CI 无需运行时生成 golden manifest
+- **`evals_runner.py`**：`run_extract` 失败时输出完整诊断信息 + 修复指引
+- **release-drafter**: 移除 PR 触发器（避免在非 main 分支触发），优化 release 模板格式
+
+---
 ## 3.0.0 (2026-06-23)
 
 ### Breaking Changes

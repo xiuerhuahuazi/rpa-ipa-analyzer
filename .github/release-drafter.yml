@@ -56,26 +56,13 @@ version-resolver:
   default: patch
 
 template: |
-  # v$RESOLVED_VERSION ($DATE)
+  # v$RESOLVED_VERSION
 
   $CHANGES
 
   ---
 
-  **完整更新日志**: [CHANGELOG.md]($REPOSITORY_URL/blob/main/CHANGELOG.md)
-
-  ## 安装
-
-  ```bash
-  git clone https://github.com/xiuerhuahuazi/rpa-ipa-analyzer.git
-  cd rpa-ipa-analyzer
-
-  # Claude Code
-  mkdir -p ~/.claude/skills/rpa-ipa-analyzer
-  cp -r rpa-ipa-analyzer/* ~/.claude/skills/rpa-ipa-analyzer/
-  mkdir -p ~/.claude/skills/rpa-ipa-update
-  cp rpa-ipa-update/SKILL.md ~/.claude/skills/rpa-ipa-update/
-  ```
+  **完整更新日志**: [CHANGELOG.md](https://github.com/xiuerhuahuazi/rpa-ipa-analyzer/blob/main/CHANGELOG.md)
 
 autolabeler:
   - label: 'breaking'
