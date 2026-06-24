@@ -87,7 +87,7 @@ rpa-ipa-analyzer/
 ├── LICENSE                      # MIT
 ├── .gitignore
 ├── rpa-ipa-analyzer/            # 全量分析技能
-│   ├── SKILL.md                 # 技能主文件（v3.0.0 4 层模型）
+│   ├── SKILL.md                 # 技能主文件（ 4 层模型）
 │   ├── SKILL_audit.md           # 独立审计命令
 │   ├── VERSION                   # 版本号
 │   ├── component_usage_counts.json  # 跨项目组件使用量统计
@@ -119,7 +119,7 @@ rpa-ipa-analyzer/
 │       ├── evals_runner.py      # 运行器（--all / --regenerate-golden）
 │       └── golden/baseline_project/  # 黄金基准项目（6 个 JSON）
 ├── rpa-ipa-update/              # 增量更新技能
-│   └── SKILL.md                 # 技能主文件（v3.0.0 同步，含变量变化检测）
+│   └── SKILL.md                 # 技能主文件（同步，含变量变化检测）
 └── platforms/                   # 平台适配器
     ├── codex/codex.yaml
     └── openclaw/skill.yaml
