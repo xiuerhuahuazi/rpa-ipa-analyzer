@@ -10,7 +10,7 @@ description: IPA Studio RPA 增量更新——修改代码后最小化更新分�
 ## 前置条件
 - `分析报告_{project_name}.md` 已存在（由 `rpa-ipa-analyzer` 生成）
 - `.extracted_nodes/manifest.json` 存在
-- `rpa-ipa-analyzer` v3.0.0+ 已安装（本技能依赖其 `scripts/extract_nodes.py`）
+- `rpa-ipa-analyzer` 已安装（本技能依赖其 `scripts/extract_nodes.py`）
 
 ## 工作流
 
