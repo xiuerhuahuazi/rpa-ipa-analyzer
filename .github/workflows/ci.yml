@@ -31,10 +31,26 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Verify extract_nodes.py subcommand stubs
+      - name: Debug - locate key files
         run: |
           echo "PWD: $(pwd)"
-          python "${GITHUB_WORKSPACE}/scripts/extract_nodes.py" --help
+          echo "GITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
+          echo "--- Top-level ---"
+          ls -la "${GITHUB_WORKSPACE}"
+          echo "--- Searching for extract_nodes.py ---"
+          find "${GITHUB_WORKSPACE}" -maxdepth 4 -name 'extract_nodes.py' -type f -print || true
+          echo "--- Searching for evals_runner.py ---"
+          find "${GITHUB_WORKSPACE}" -maxdepth 4 -name 'evals_runner.py' -type f -print || true
+
+      - name: Verify extract_nodes.py subcommand stubs
+        run: |
+          EXTRACT_NODES=$(find "${GITHUB_WORKSPACE}" -maxdepth 4 -name 'extract_nodes.py' -type f -print -quit)
+          if [ -z "$EXTRACT_NODES" ]; then
+            echo "FATAL: extract_nodes.py not found anywhere in workspace"
+            exit 1
+          fi
+          echo "Found: $EXTRACT_NODES"
+          python "$EXTRACT_NODES" --help
 
       - name: Prepare golden baseline extracted nodes
         run: |
@@ -42,13 +58,20 @@ jobs:
             echo 'Golden manifest already present, skipping generation.'
             exit 0
           fi
+          EXTRACT_NODES=$(find "${GITHUB_WORKSPACE}" -maxdepth 4 -name 'extract_nodes.py' -type f -print -quit)
           echo 'Generating extracted nodes for golden baseline...'
-          python "${GITHUB_WORKSPACE}/scripts/extract_nodes.py" extract "${GITHUB_WORKSPACE}/evals/golden/baseline_project" --force
+          python "$EXTRACT_NODES" extract "${GITHUB_WORKSPACE}/evals/golden/baseline_project" --force
           ls -la "${GITHUB_WORKSPACE}/evals/golden/baseline_project/.extracted_nodes/"
 
       - name: Run evals
         run: |
-          python "${GITHUB_WORKSPACE}/evals/evals_runner.py" --all
+          EVALS_RUNNER=$(find "${GITHUB_WORKSPACE}" -maxdepth 4 -name 'evals_runner.py' -type f -print -quit)
+          if [ -z "$EVALS_RUNNER" ]; then
+            echo "FATAL: evals_runner.py not found anywhere in workspace"
+            exit 1
+          fi
+          echo "Found: $EVALS_RUNNER"
+          python "$EVALS_RUNNER" --all
 
   syntax-check:
     runs-on: ubuntu-latest
