@@ -33,49 +33,22 @@ jobs:
 
       - name: Verify extract_nodes.py subcommand stubs
         run: |
-          if [ -f scripts/extract_nodes.py ]; then
-            python scripts/extract_nodes.py --help
-          elif [ -f rpa-ipa-analyzer/scripts/extract_nodes.py ]; then
-            python rpa-ipa-analyzer/scripts/extract_nodes.py --help
-          else
-            echo "ERROR: extract_nodes.py not found. Listing root:"
-            ls -la
-            echo "--- Recursive ---"
-            ls -R
-            exit 1
-          fi
+          echo "PWD: $(pwd)"
+          python "${GITHUB_WORKSPACE}/scripts/extract_nodes.py" --help
 
       - name: Prepare golden baseline extracted nodes
         run: |
-          if [ -f evals/golden/baseline_project/.extracted_nodes/manifest.json ]; then
+          if [ -f "${GITHUB_WORKSPACE}/evals/golden/baseline_project/.extracted_nodes/manifest.json" ]; then
             echo 'Golden manifest already present, skipping generation.'
             exit 0
           fi
           echo 'Generating extracted nodes for golden baseline...'
-          if [ -f scripts/extract_nodes.py ]; then
-            python scripts/extract_nodes.py extract evals/golden/baseline_project --force
-            ls -la evals/golden/baseline_project/.extracted_nodes/
-          elif [ -f rpa-ipa-analyzer/scripts/extract_nodes.py ]; then
-            python rpa-ipa-analyzer/scripts/extract_nodes.py extract rpa-ipa-analyzer/evals/golden/baseline_project --force
-            ls -la rpa-ipa-analyzer/evals/golden/baseline_project/.extracted_nodes/
-          else
-            echo 'ERROR: extract_nodes.py not found, cannot prepare golden manifest.'
-            exit 1
-          fi
+          python "${GITHUB_WORKSPACE}/scripts/extract_nodes.py" extract "${GITHUB_WORKSPACE}/evals/golden/baseline_project" --force
+          ls -la "${GITHUB_WORKSPACE}/evals/golden/baseline_project/.extracted_nodes/"
 
       - name: Run evals
         run: |
-          if [ -f evals/evals_runner.py ]; then
-            python evals/evals_runner.py --all
-          elif [ -f rpa-ipa-analyzer/evals/evals_runner.py ]; then
-            python rpa-ipa-analyzer/evals/evals_runner.py --all
-          else
-            echo "ERROR: evals_runner.py not found. Listing root:"
-            ls -la
-            echo "--- Recursive ---"
-            ls -R
-            exit 1
-          fi
+          python "${GITHUB_WORKSPACE}/evals/evals_runner.py" --all
 
   syntax-check:
     runs-on: ubuntu-latest
