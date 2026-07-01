@@ -4,7 +4,7 @@
 
 ## 案例 1：SSCM 系统 Token 提取 + API 调用
 
-**领域**：中国移动 SSCM
+**领域**：SSCM
 **组件链**：`browser_inject_js_code` (StorageUtils 提取 sessionStorage) → `script_python_execute` (bearer_token → HTTP 请求)
 **参考价值**：展示"浏览器取 Token → Python 调用 API"的安全模式
 
