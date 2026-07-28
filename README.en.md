@@ -21,11 +21,11 @@ This skill analyzes IPA Studio RPA projects and generates professional analysis 
 ## Highlights
 
 - **4-Layer Capability Model**: Phase 0 (self-calibration) -> Layer 1 (project modeling) -> Layer 2 (code & business analysis) -> Layer 3 (artifact generation). Cleaner than the old 7-Phase linear model.
-- **Three Depth Levels**: quick (overview only, no extract_nodes run) / standard (full analysis, default) / deep (includes 6-lens audit). Natural language + auto-scale detection.
-- **Edges Collection**: `extract_nodes.py` now extracts `graphData.edges[]` into `manifest.json`, enabling the `trace` subcommand for variable lineage tracking.
-- **Modular Extractor**: `extract_nodes.py` split from a single 581-line file into 10 focused modules under `_extract/`, with CLI subcommands (extract/list/stats/trace/compare).
-- **Independent Audit Command**: `/rpa-ipa-audit` as opt-in heavy operation -- zero overhead on default analysis path.
-- **Component Confidence System**: every component in `component_usage_counts.json` tagged with confidence (low/medium/high) plus cleanup suggestions for stale entries.
+- **Three Depth Levels**: quick / standard / deep with auto-scale detection. **v3.1**: always run extract+skeleton first (LLM never reads raw multi-MB flow JSON); §2.2 references `.extracted_nodes/` instead of pasting source.
+- **Token-optimized incremental update**: `diff` + `patch` CLI; audit defaults to hash-changed nodes only (`--full` for full audit).
+- **Edges Collection**: `extract_nodes.py` extracts `graphData.edges[]` into `manifest.json`, enabling the `trace` subcommand.
+- **Modular Extractor**: CLI subcommands `extract/list/stats/trace/compare/diff/skeleton/patch`.
+- **Independent Audit Command**: `/rpa-ipa-audit` as opt-in heavy operation.
 - **Regression Test Framework**: golden manifest diff + structured assertions, 50/50 evals pass.
 
 ## Supported Project Types

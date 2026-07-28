@@ -1,5 +1,26 @@
 # Changelog
 
+## 3.1.0 (2026-07-28)
+
+### Added
+- **Token 优化流水线**：`extract` → `skeleton` → LLM 润色；增量用 `diff` + `patch`
+- **`scripts/diff_nodes.py`** / CLI `extract_nodes.py diff`：对比 `hash_snapshot` / `previous_manifest`，输出 changed.json
+- **`scripts/patch_report.py`** / CLI `patch`：按 `#### 节点 N{n}` 锚点外科手术式更新报告（禁止整文件重写）
+- **`scripts/generate_skeleton.py`** / CLI `skeleton`：无 LLM 生成报告结构骨架（§1/§3/附录B/节点索引）
+- **`scripts/_extract/snapshot.py`**：`extract --force` 自动保存 `previous_manifest.json` + `hash_snapshot.txt`
+- **审计默认增量**：`SKILL_audit.md` 默认只审计 hash 变更节点（`--full` 全量）
+
+### Changed
+- **SKILL.md 重写为 extract-first**：禁止 LLM 读原始 multi-MB flow JSON；§2.2 代码外置（路径+hash）；按需加载 references
+- **rpa-ipa-update**：改为调用 `diff`/`patch`，去掉内联大段对比 Python
+- **report_template.md**：§2.2 去掉「必须贴代码片段」，改为文件引用规则
+- **quick 模式**：同样先 extract+skeleton（确定性、省 token），不再让 LLM 手拆 JSON
+
+### Fixed
+- `generate_skeleton.py` 兼容 `processResult.json` 为 list 的形态
+- hash_snapshot 使用 `sort_keys`，避免变量映射假阳性 diff
+
+---
 ## 3.0.1 (2026-06-24)
 
 ### Added

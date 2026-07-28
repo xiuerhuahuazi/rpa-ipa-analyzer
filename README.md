@@ -14,14 +14,13 @@ Claude Code / OpenAI Codex / OpenClaw 通用的 IPA Studio RPA 项目分析与�
 
 ## 新特性
 
-- **能力分层模型**：分析流程从 7 个 Phase 升级为 4 个能力层（层0自校准→层1项目建模→层2代码与业务分析→层3产物生成），依赖语义更清晰
-- **三级分析深度**：quick（宏观架构）/ standard（完整分析）/ deep（含 6 维并行审计），自动判定项目规模并推荐深度
-- **自适应组件升级**：`component_usage_counts.json` 跨项目累积组件使用量，自动触发 promotion 更新 `ipa_format.md`
-- **edges 收集 + 变量血缘追踪**：`extract_nodes.py` 新增 edges 提取和 `trace` 子命令，可追踪变量从生产者到消费者的完整链路
-- **通用设计模式库**：14 个模式拆为 5 个通用 Checklist 模式 + 5 个领域参考案例，分析时自动匹配标注
-- **独立审计命令 `/rpa-ipa-audit`**：6 维并行代码审计按需触发，零默认成本
-- **`@desc` 自动填充**：提取的代码文件不再使用 `[待补充]` 占位符，自动生成有意义的描述
-- **回归测试框架**：golden manifest diff + 结构化断言，Evals 50/50 PASS
+- **3.1.0 Token 优化**：extract-first（禁读原始 flow JSON）→ `skeleton` 生成结构 → LLM 只写业务语义；§2.2 代码外置；`diff`/`patch` 增量更新；审计默认按 hash 增量
+- **能力分层模型**：4 个能力层（层0自校准→层1项目建模→层2代码与业务分析→层3产物生成）
+- **三级分析深度**：quick / standard / deep，自动判定项目规模并推荐深度
+- **自适应组件升级**：`component_usage_counts.json` 跨项目累积，触发 promotion
+- **edges + 变量血缘**：`trace` 子命令追踪生产者→消费者
+- **独立审计** `/rpa-ipa-audit`：按需触发；3.1 起默认增量
+- **回归测试**：golden manifest diff + 结构化断言
 
 ## 安装
 
@@ -31,13 +30,17 @@ Claude Code / OpenAI Codex / OpenClaw 通用的 IPA Studio RPA 项目分析与�
 git clone https://github.com/xiuerhuahuazi/rpa-ipa-analyzer.git
 cd rpa-ipa-analyzer
 
-# 安装 analyzer
+# 安装 analyzer（必须含 scripts/）
 mkdir -p ~/.claude/skills/rpa-ipa-analyzer
 cp -r rpa-ipa-analyzer/* ~/.claude/skills/rpa-ipa-analyzer/
 
 # 安装 update
 mkdir -p ~/.claude/skills/rpa-ipa-update
 cp rpa-ipa-update/SKILL.md ~/.claude/skills/rpa-ipa-update/
+
+# 可选：独立审计 skill
+mkdir -p ~/.claude/skills/rpa-ipa-audit
+cp rpa-ipa-analyzer/SKILL_audit.md ~/.claude/skills/rpa-ipa-audit/SKILL.md
 ```
 
 ### OpenAI Codex
@@ -45,7 +48,7 @@ cp rpa-ipa-update/SKILL.md ~/.claude/skills/rpa-ipa-update/
 ```bash
 mkdir -p ~/.codex/skills/rpa-ipa-analyzer
 cp -r rpa-ipa-analyzer/* ~/.codex/skills/rpa-ipa-analyzer/
-cp rpa-ipa-analyzer/platforms/codex/codex.yaml ~/.codex/skills/rpa-ipa-analyzer/
+cp platforms/codex/codex.yaml ~/.codex/skills/rpa-ipa-analyzer/
 ```
 
 ### OpenClaw
@@ -53,28 +56,33 @@ cp rpa-ipa-analyzer/platforms/codex/codex.yaml ~/.codex/skills/rpa-ipa-analyzer/
 ```bash
 mkdir -p ~/.openclaw/skills/rpa-ipa-analyzer
 cp -r rpa-ipa-analyzer/* ~/.openclaw/skills/rpa-ipa-analyzer/
-cp rpa-ipa-analyzer/platforms/openclaw/skill.yaml ~/.openclaw/skills/rpa-ipa-analyzer/
+cp platforms/openclaw/skill.yaml ~/.openclaw/skills/rpa-ipa-analyzer/
+```
+
+### Cursor
+
+```bash
+mkdir -p ~/.cursor/skills/rpa-ipa-analyzer
+cp -r rpa-ipa-analyzer/* ~/.cursor/skills/rpa-ipa-analyzer/
+mkdir -p ~/.cursor/skills/rpa-ipa-update
+cp rpa-ipa-update/SKILL.md ~/.cursor/skills/rpa-ipa-update/
 ```
 
 ## 快速开始
 
 ```bash
-# 1. 进入 IPA Studio 项目目录
 cd /path/to/your-ipa-project
+SK=~/.claude/skills/rpa-ipa-analyzer   # 或 ~/.cursor/skills/rpa-ipa-analyzer
 
-# 2. 提取代码节点
-python3 ~/.claude/skills/rpa-ipa-analyzer/scripts/extract_nodes.py extract . --force
+# 确定性抽取 + 报告骨架（零 LLM token）
+python3 $SK/scripts/extract_nodes.py extract . --force
+python3 $SK/scripts/extract_nodes.py skeleton . --depth standard
 
-# 3. 在 Claude Code 中说：
-#    "/rpa-ipa-analyzer --depth standard ."  （完整分析）
-#    "/rpa-ipa-analyzer --depth quick ."     （快速概览，大项目推荐）
-#    "/rpa-ipa-analyzer --depth deep ."      （含 6 维审计，发布前审查）
-
-# 4. 独立审计（可选）：
-#    "/rpa-ipa-audit ."
-
-# 5. 增量更新（代码修改后）：
-#    "/rpa-ipa-update 更新分析报告"
+# 再在 Agent 中说：
+#   "/rpa-ipa-analyzer --depth standard ."
+#   "/rpa-ipa-analyzer --depth quick ."
+#   "/rpa-ipa-update 更新分析报告"
+#   "/rpa-ipa-audit ."                 # 默认增量；全量加 --full
 ```
 
 ## 目录结构
@@ -93,20 +101,13 @@ rpa-ipa-analyzer/
 │   ├── component_usage_counts.json  # 跨项目组件使用量统计
 │   ├── promotion_config.json    # 自适应升级策略配置
 │   ├── scripts/
-│   │   ├── extract_nodes.py     # CLI 入口（extract/list/stats/trace/compare 子命令）
-│   │   ├── component_promotion.py  # 组件升级工具
-│   │   ├── version_check.py     # GitHub 版本检查
-│   │   └── _extract/            # 提取核心库（10 个模块）
-│   │       ├── __init__.py       # 导出 extract_project, ExtractResult
-│   │       ├── result_types.py  # NodeMeta, FlowEdge, ExtractResult 数据类
-│   │       ├── core.py          # safe_name, code_hash, find_param 等工具函数
-│   │       ├── extractors.py    # Python/JS 节点提取器
-│   │       ├── edges.py         # edges 收集与邻接表构建
-│   │       ├── flows.py         # 流程文件递归提取（含嵌套块）
-│   │       ├── headers.py       # @node 头生成（含 @desc 自动填充）
-│   │       ├── duplicates.py    # 重复代码检测 + 跨项目共享检测
-│   │       ├── counts.py        # 组件使用量统计（含 confidence 计算）
-│   │       └── manifest.py      # extract_project 主编排
+│   │   ├── extract_nodes.py     # CLI：extract/list/stats/trace/compare/diff/skeleton/patch
+│   │   ├── diff_nodes.py        # 增量 hash/变量对比
+│   │   ├── patch_report.py      # 按 #### 节点 N{n} 补丁报告
+│   │   ├── generate_skeleton.py # 无 LLM 生成报告骨架
+│   │   ├── component_promotion.py
+│   │   ├── version_check.py
+│   │   └── _extract/            # 提取核心库（含 snapshot.py）
 │   ├── references/
 │   │   ├── ipa_format.md        # IPA Studio JSON 格式参考（40+ 组件字段定义）
 │   │   ├── report_template.md   # 报告结构模板（含 quick/deep 模式标注）
