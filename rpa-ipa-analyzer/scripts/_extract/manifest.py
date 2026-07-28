@@ -8,6 +8,7 @@ from .headers import node_header_python, node_header_js
 from .counts import update_component_counts
 from .duplicates import detect_duplicates
 from .result_types import ExtractResult
+from .snapshot import write_hash_snapshot
 
 
 def extract_project(project_path: str, force: bool = False,
@@ -43,6 +44,17 @@ def extract_project(project_path: str, force: bool = False,
             print(f"[跳过] .extracted_nodes 已存在 (提取日期: {existing_date})，使用 --force 强制重新提取")
             return ExtractResult(out_dir=out_dir, manifest=manifest, manifest_path=manifest_file,
                                 project_name=project_name, stats=manifest.get("stats", {}))
+
+    # Preserve previous manifest + hash snapshot for incremental diff (rpa-ipa-update)
+    if force and (out_dir / "manifest.json").exists():
+        try:
+            old_text = (out_dir / "manifest.json").read_text(encoding="utf-8")
+            (out_dir / "previous_manifest.json").write_text(old_text, encoding="utf-8")
+            old_m = json.loads(old_text)
+            write_hash_snapshot(old_m, out_dir / "hash_snapshot.txt")
+            print("[快照] 已保存 previous_manifest.json + hash_snapshot.txt")
+        except Exception as exc:
+            print(f"[警告] 保存增量快照失败: {exc}")
 
     out_dir.mkdir(parents=True, exist_ok=True)
     all_metas: list[dict] = []
@@ -143,6 +155,17 @@ def extract_project(project_path: str, force: bool = False,
     manifest_path = out_dir / "manifest.json"
     with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
+
+    # Keep a post-extract snapshot so next --force can diff against this run
+    try:
+        # Only write current snapshot if none exists yet (first extract);
+        # on --force we already wrote the *old* snapshot before overwrite.
+        snap = out_dir / "hash_snapshot.txt"
+        if not snap.exists():
+            write_hash_snapshot(manifest, snap)
+            print("[快照] 已初始化 hash_snapshot.txt")
+    except Exception as exc:
+        print(f"[警告] 写入 hash_snapshot 失败: {exc}")
 
     promotion_candidates = update_component_counts(all_metas)
 

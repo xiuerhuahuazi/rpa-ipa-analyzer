@@ -7,6 +7,9 @@ Usage:
     python extract_nodes.py stats <project_path> [--json]
     python extract_nodes.py trace <project_path> <variable_name> [--direction up|down|both] [--depth N]
     python extract_nodes.py compare <proj1> <proj2> [--mode shared-code|component-diff|all]
+    python extract_nodes.py diff <project_path> [--json] [--out changed.json]
+    python extract_nodes.py skeleton <project_path> [--depth quick|standard|deep]
+    python extract_nodes.py patch <report.md> [--node N] [--from-file f] [--delete] [--meta ...]
 """
 from __future__ import annotations
 import argparse, json, sys
@@ -194,6 +197,23 @@ def main():
     p_compare.add_argument("proj2")
     p_compare.add_argument("--mode", choices=["shared-code", "component-diff", "all"], default="all")
 
+    p_diff = sub.add_parser("diff", help="对比 hash_snapshot 与当前 manifest")
+    p_diff.add_argument("project_path")
+    p_diff.add_argument("--json", action="store_true")
+    p_diff.add_argument("--out")
+
+    p_skel = sub.add_parser("skeleton", help="从 manifest 生成报告骨架（无 LLM）")
+    p_skel.add_argument("project_path")
+    p_skel.add_argument("--depth", choices=["quick", "standard", "deep"], default="standard")
+
+    p_patch = sub.add_parser("patch", help="按 #### 节点 N{n} 锚点补丁报告")
+    p_patch.add_argument("report")
+    p_patch.add_argument("--node", type=int)
+    p_patch.add_argument("--from-file")
+    p_patch.add_argument("--delete", action="store_true")
+    p_patch.add_argument("--meta")
+    p_patch.add_argument("--dry-run", action="store_true")
+
     args = parser.parse_args()
 
     if args.command == "extract" or args.command is None:
@@ -209,6 +229,30 @@ def main():
         cmd_trace(args)
     elif args.command == "compare":
         cmd_compare(args)
+    elif args.command == "diff":
+        from diff_nodes import diff_project, main as diff_main
+        # Reuse CLI via argv shim
+        sys.argv = ["diff_nodes.py", args.project_path] + (
+            ["--json"] if args.json else []) + (["--out", args.out] if args.out else [])
+        diff_main()
+    elif args.command == "skeleton":
+        from generate_skeleton import generate
+        generate(args.project_path, args.depth)
+    elif args.command == "patch":
+        from patch_report import main as patch_main
+        argv = ["patch_report.py", args.report]
+        if args.node is not None:
+            argv += ["--node", str(args.node)]
+        if args.from_file:
+            argv += ["--from-file", args.from_file]
+        if args.delete:
+            argv.append("--delete")
+        if args.meta:
+            argv += ["--meta", args.meta]
+        if args.dry_run:
+            argv.append("--dry-run")
+        sys.argv = argv
+        patch_main()
 
 
 if __name__ == "__main__":
