@@ -33,10 +33,9 @@
 
 ## 影响范围
 
-- [ ] `SKILL.md` / `SKILL_audit.md`（技能指令）
+- [ ] `skills/rpa-ipa-analyzer/SKILL.md`（技能指令：analyze/update/audit）
 - [ ] `scripts/extract_nodes.py` / `scripts/_extract/`（提取引擎）
 - [ ] `references/`（参考文件）
-- [ ] `rpa-ipa-update/SKILL.md`（增量更新）
 - [ ] `evals/`（测试框架）
 - [ ] 仅文档
 

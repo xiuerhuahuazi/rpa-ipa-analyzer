@@ -35,9 +35,10 @@ body:
     attributes:
       label: 影响范围
       options:
-        - 仅 rpa-ipa-analyzer（全量分析）
-        - 仅 rpa-ipa-update（增量更新）
-        - 两者都需要
+        - rpa-ipa-analyzer 分析模式（analyze）
+        - rpa-ipa-analyzer 增量模式（update）
+        - rpa-ipa-analyzer 审计模式（audit）
+        - 脚本 / evals / 文档
         - 其他
 
   - type: checkboxes

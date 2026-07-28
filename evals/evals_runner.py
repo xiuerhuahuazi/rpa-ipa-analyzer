@@ -10,7 +10,8 @@ GOLDEN_MANIFEST = BASELINE / "golden_manifest.json"
 
 def _find_counts_file() -> Path:
     candidates = [
-        SKILL_DIR / "rpa-ipa-analyzer" / "component_usage_counts.json",  # monorepo
+        SKILL_DIR / "skills" / "rpa-ipa-analyzer" / "component_usage_counts.json",  # skills/ layout
+        SKILL_DIR / "rpa-ipa-analyzer" / "component_usage_counts.json",  # legacy monorepo
         SKILL_DIR / "component_usage_counts.json",  # installed skill root
     ]
     for c in candidates:
@@ -28,9 +29,10 @@ def _find_extract_script():
         return Path(env_path)
     # 自动搜索
     roots = [
-        SCRIPT_DIR.parent,                        # evals/.. (repo root)
-        SCRIPT_DIR.parent / "rpa-ipa-analyzer",   # monorepo nested
-        SCRIPT_DIR.parent.parent,                  # evals/../.. (if evals inside nested)
+        SCRIPT_DIR.parent,                                      # evals/.. (repo root)
+        SCRIPT_DIR.parent / "skills" / "rpa-ipa-analyzer",       # skills/ layout
+        SCRIPT_DIR.parent / "rpa-ipa-analyzer",                  # legacy monorepo
+        SCRIPT_DIR.parent.parent,                               # evals/../..
     ]
     for root in roots:
         if not root.exists():

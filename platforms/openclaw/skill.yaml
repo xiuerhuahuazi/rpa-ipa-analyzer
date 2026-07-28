@@ -4,10 +4,10 @@
 # along with the rest of the skill files.
 
 name: rpa-ipa-analyzer
-version: 1.0.0
+version: 3.2.0
 description: >-
-  Analyze IPA Studio RPA projects to produce comprehensive business and code
-  analysis reports with Mermaid flowcharts.
+  Analyze, incrementally update, or audit IPA Studio RPA projects
+  (modes: analyze / update / audit).
 
 entrypoint: SKILL.md
 

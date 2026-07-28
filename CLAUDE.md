@@ -21,12 +21,13 @@
 2. 手动检查草稿 → 编辑 CHANGELOG.md 确认 → 发布
 3. 发布后更新 VERSION 文件
 
-### 安装路径
-- Claude Code: ~/.claude/skills/rpa-ipa-analyzer/
-- rpa-ipa-update: ~/.claude/skills/rpa-ipa-update/
+### 安装路径（3.2+）
+- **唯一技能**：`~/.claude/skills/rpa-ipa-analyzer/` ← 来自 `skills/rpa-ipa-analyzer/`
+- Cursor：`~/.cursor/skills/rpa-ipa-analyzer/`
+- **已废弃**：`rpa-ipa-update`、`rpa-ipa-audit` 独立 skill 目录（请删除）
 - 零外部依赖（Python 3.8+ 标准库）
 
 ### 跨平台
-- 支持 Claude Code / OpenAI Codex / OpenClaw
+- 支持 Claude Code / Cursor / OpenAI Codex / OpenClaw
 - CI 使用 sys.executable 而非 python.exe（兼容 Linux）
 - 代码兼容 Python 3.8–3.12（避免 3.9+ 特性如 str.removesuffix）

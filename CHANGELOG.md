@@ -1,5 +1,23 @@
 # Changelog
 
+## 3.2.0 (2026-07-28)
+
+### Breaking Changes
+- **单一技能**：移除独立安装的 `rpa-ipa-update` 与 `rpa-ipa-audit`；增量更新与审计并入 `rpa-ipa-analyzer` 的 **update / audit** 模式
+- **仓库布局**：`rpa-ipa-analyzer/` → `skills/rpa-ipa-analyzer/`（对齐热门 skill 仓 `skills/` 约定）
+- **删除** `SKILL_audit.md` 与顶层 `rpa-ipa-update/`；安装只需复制一个目录
+- 触发词仍可用「更新分析报告」「审计」，但应调用 **`/rpa-ipa-analyzer`**，不再使用 `/rpa-ipa-update` / `/rpa-ipa-audit`
+
+### Migration
+1. 删除 `~/.claude/skills/rpa-ipa-update`、`~/.claude/skills/rpa-ipa-audit`（及 Cursor 对应目录）
+2. `cp -r skills/rpa-ipa-analyzer/* ~/.claude/skills/rpa-ipa-analyzer/`
+
+### Changed
+- `SKILL.md`：统一 describe 三种模式与触发路由
+- `evals_runner.py` / README / CLAUDE.md / Issue·PR 模板：路径与技能列表更新
+- `audit_swarm.md`：触发说明改为模式 C
+
+---
 ## 3.1.0 (2026-07-28)
 
 ### Added
