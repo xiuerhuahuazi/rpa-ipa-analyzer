@@ -45,7 +45,7 @@ def extract_project(project_path: str, force: bool = False,
             return ExtractResult(out_dir=out_dir, manifest=manifest, manifest_path=manifest_file,
                                 project_name=project_name, stats=manifest.get("stats", {}))
 
-    # Preserve previous manifest + hash snapshot for incremental diff (rpa-ipa-update)
+    # Preserve previous manifest + hash snapshot for incremental update mode
     if force and (out_dir / "manifest.json").exists():
         try:
             old_text = (out_dir / "manifest.json").read_text(encoding="utf-8")
