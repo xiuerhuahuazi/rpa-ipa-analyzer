@@ -7,7 +7,18 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 SKILL_DIR = SCRIPT_DIR.parent
 BASELINE = SCRIPT_DIR / "golden" / "baseline_project"
 GOLDEN_MANIFEST = BASELINE / "golden_manifest.json"
-COUNTS_FILE = SKILL_DIR / "component_usage_counts.json"
+
+def _find_counts_file() -> Path:
+    candidates = [
+        SKILL_DIR / "rpa-ipa-analyzer" / "component_usage_counts.json",  # monorepo
+        SKILL_DIR / "component_usage_counts.json",  # installed skill root
+    ]
+    for c in candidates:
+        if c.exists():
+            return c
+    return candidates[0]
+
+COUNTS_FILE = _find_counts_file()
 def _find_extract_script():
     """自发现 extract_nodes.py — 优先 CI 环境变量，再自动搜索。"""
     import os as _os

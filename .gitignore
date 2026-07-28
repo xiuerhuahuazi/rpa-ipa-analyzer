@@ -29,6 +29,9 @@ Thumbs.db
 
 # Temp files
 *.tmp
+*.temp
+_fixture/
+*.tmp
 *.log
 
 # Design docs (internal, not for distribution)
