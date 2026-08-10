@@ -5,7 +5,7 @@ description: Analyze, incrementally update, or audit IPA Studio RPA projects. Tr
 
 # IPA Studio RPA Analyzer
 
-版本：**3.3.0**。`{SKILL_ROOT}` = 本技能安装目录（含 `scripts/`）。
+版本：**3.3.1**。`{SKILL_ROOT}` = 本技能安装目录（含 `scripts/`）。
 
 单一技能，三种模式（**不要**再安装 `rpa-ipa-update` / `rpa-ipa-audit`）：
 
@@ -26,6 +26,7 @@ description: Analyze, incrementally update, or audit IPA Studio RPA projects. Tr
 3. **代码外置**：§2.2 只写路径 + hash + 业务概述；禁止贴完整源码。
 4. **按需加载**：默认不读 `ipa_format.md` / `patterns_*` / `audit_swarm.md`。
 5. **改代码走 apply**：编辑 `.extracted_nodes/N*.py|js` 后用 `apply` 写回 flow，禁止手改巨型 JSON。
+6. **变量分域必登记**：新增脚本出参/入参映射前，先在对应流程 `global_vars`（及跨流程时目标流程）登记 `key`；详见下方「变量/参数铁律」。
 
 ### 写回流程 JSON（apply）
 
@@ -35,7 +36,29 @@ python {SKILL_ROOT}/scripts/extract_nodes.py apply {project_path} [--dry-run] [-
 
 - 默认只写 **hash 有变更** 的 structured 节点；`--node` / `--file` 可精选；`--dry-run` 预览。
 - 写入前备份 `{flow}.bak_apply_YYYYMMDD_HHMMSS`；剥离 `@node` 头；校验写后 hash。
-- 规格：`docs/superpowers/specs/2026-08-10-extract-nodes-apply.md`。
+- **`apply` 只改 `python_script`/`js_code`**，不改 `global_vars`、`python_input_variables`、`_script_execute_result`、子流程 `input_variables` —— 这些须另补丁。
+- 规格：`docs/superpowers/specs/2026-08-10-extract-nodes-apply.md`（技能仓库）。
+
+### 变量/参数铁律（IPA 运行时）
+
+Agent 改脚本 I/O 时**必须**遵守，否则运行报「出参定义解析失败，变量/参数表内不存在【xxx】」：
+
+| 层级 | 存放位置 | 作用域 | 脚本如何用到 |
+|------|----------|--------|----------------|
+| 项目参数 | `globalParams.json` | 全项目共享（文件路径、DATEYM 等） | 仍须经节点 `python_input_variables` / JS 入参映射进脚本 |
+| 流程变量 | 各 flow JSON 顶层 **`global_vars[]`** | **仅该流程域**（主流程 / 业务流程 / 生成成本基础表 / 生成预提表 / 数据处理…各自一份） | 域内节点共享；脚本仍须映射 |
+| 节点入参映射 | `python_input_variables`（或 JS 等价） | 单节点 | `{脚本内名: 流程变量key}` |
+| 节点出参映射 | `_script_execute_result` | 单节点 → 写回流程变量 | `{脚本内名: 流程变量key}`；**value 侧 key 必须已在本流程 `global_vars`** |
+| 子流程交换 | `sub_process.input_variables` / `output_variables` | 父→子 / 子→父 | 两侧流程的 `global_vars` 都要有对应 key |
+
+**硬约束：**
+
+1. `_script_execute_result` / 子流程映射里出现的名字，必须先在**该流程** `global_vars` 登记：`{id, key, description, value}`（`value` 可空串）。
+2. 跨子流程传递时：源流程出参、父流程桥接、子流程 `global_vars` + `input_variables` **缺一不可**。
+3. **禁止**把 Python **类**（如自定义 Exception）写作出参；只映射函数/普通对象。类可留在脚本内，用实例属性识别（如 `is_node_fail`）。
+4. 改 I/O 检查清单：`global_vars` → 节点出参/入参映射 →（若跨流程）子流程 `input_variables` → `apply` 脚本。
+
+详情与字段形状：`references/ipa_format.md` §变量作用域与脚本映射。
 
 ---
 

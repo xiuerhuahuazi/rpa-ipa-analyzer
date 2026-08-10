@@ -73,10 +73,49 @@
 { sourceNode, targetNode, source, target }
 ```
 
-### global_vars[] 全局变量
+### global_vars[] 流程域变量/参数管理
 ```
 { id, key, description, value }
 ```
+
+每个 **flow JSON**（主流程、业务流程、生成成本基础表流程、生成预提表流程、数据处理与透视报告、COMMON 子流程等）各自有一份 `global_vars`。  
+**同域节点共享**；不同 flow 互不共享，除非经 `sub_process` 的 `input_variables` / `output_variables` 显式传递。
+
+IPA 运行时解析出参/入参映射时，**value 指向的名字必须已在该流程 `global_vars` 中登记**，否则报错类似：
+
+`输出属性【出参定义】解析失败，变量/参数表内不存在【raise_node_error】`
+
+### 变量作用域与脚本映射（必读）
+
+```
+globalParams.json          ← 项目级参数（全项目）
+       │ 仍须映射进脚本
+       ▼
+flow.global_vars[]         ← 流程域变量表（每流程一份）
+       │
+       ├─ script_python_execute.python_input_variables
+       │     { 脚本内变量名 : global_vars.key }
+       ├─ script_python_execute._script_execute_result
+       │     { 脚本内出参名 : global_vars.key }   ← value 侧必须已登记
+       └─ sub_process.input_variables / output_variables
+             父流程变量 ↔ 子流程变量（两侧 global_vars 均需有 key）
+```
+
+| 规则 | 说明 |
+|------|------|
+| 先登记再映射 | 新增 helper/DF/路径等到出参前，先 `global_vars.append({id, key, description, value:""})` |
+| 脚本不能直接看见流程变量 | 必须写进 `python_input_variables`（JS 同理） |
+| 项目参数同理 | `globalParams.json` 的 key 进脚本也要节点映射，不是自动注入 |
+| 禁止类作出参 | 自定义 Exception/class 不要放进 `_script_execute_result`；函数/数据对象可以 |
+| apply 不管变量 | `extract_nodes.py apply` 只写代码字段；`global_vars` 与映射须手改或另做补丁 |
+
+**示例（业务流程产出工具函数 → 成本基础表子流程使用）：**
+
+1. `业务流程.json` `global_vars` 增加 `raise_node_error` 等  
+2. `common_function` 节点 `_script_execute_result` 增加 `"raise_node_error": "raise_node_error"`  
+3. 子流程节点 `input_variables` 传入同名  
+4. `生成成本基础表流程.json` `global_vars` 也增加同名  
+5. 各 PY 节点 `python_input_variables` 注入 `"raise_node_error": "raise_node_error"`
 
 ## Config 文件结构
 
@@ -90,6 +129,7 @@ project_info{ project_name, project_id, main_process_path, version, designer_ver
 ```
 [{ id, key, type:"输入文件"|"下拉单选"|..., description, value, allValues }]
 ```
+项目级参数表（与流程 `global_vars` 不同域）。全项目共享，但 **Python/JS 节点仍须通过入参映射** 才能在脚本内使用。
 
 ### globalParamsAll.json
 ```
