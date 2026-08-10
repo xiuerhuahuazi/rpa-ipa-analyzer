@@ -16,7 +16,8 @@ Do **not** install separate `rpa-ipa-update` / `rpa-ipa-audit` skills (removed i
 
 - **skills/ layout** aligned with popular agent-skill repos (`npx skills add`)
 - **Token-optimized**: extract → skeleton → LLM; §2.2 references `.extracted_nodes/` (no full source paste)
-- **CLI**: `extract/list/stats/trace/compare/diff/skeleton/patch`
+- **CLI**: `extract/list/stats/trace/compare/diff/skeleton/patch/apply`
+- **`apply` (3.3)**: write edited `N*.py|js` back into flow JSON with header strip, hash skip, and `bak_apply_*` backups
 - **Evals**: golden manifest diff + promotion checks
 
 ## Install

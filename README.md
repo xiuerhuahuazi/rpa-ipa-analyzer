@@ -16,6 +16,11 @@ Claude Code / Cursor / OpenAI Codex / OpenClaw 通用的 IPA Studio RPA 分析�
 | update | 「更新分析报告」「增量更新」 | 报告局部 patch |
 | audit | 「审计」「代码安全检查」 | `AUDIT_REPORT.md` |
 
+## 新特性（3.3）
+
+- **`apply` 写回**：编辑 `.extracted_nodes/N*.py|js` 后，用 `extract_nodes.py apply` 精准写回 flow JSON（剥离 `@node` 头、hash 跳过未变更、`bak_apply_*` 备份）
+- 改代码优先走 apply，避免 Agent 整读/手改巨型流程 JSON
+
 ## 新特性（3.2）
 
 - **单一技能**：合并原 `rpa-ipa-update` / `rpa-ipa-audit`，仓库改为 `skills/` 布局（对齐热门 skill 仓）
@@ -52,6 +57,11 @@ SK=~/.claude/skills/rpa-ipa-analyzer
 python3 $SK/scripts/extract_nodes.py extract . --force
 python3 $SK/scripts/extract_nodes.py skeleton . --depth standard
 
+# 编辑 .extracted_nodes/N*.py 后写回流程 JSON
+python3 $SK/scripts/extract_nodes.py apply . --dry-run          # 预览
+python3 $SK/scripts/extract_nodes.py apply . --node 55          # 指定节点
+# python3 $SK/scripts/extract_nodes.py apply .                  # 只写 hash 有变更的节点
+
 # Agent：
 #   "/rpa-ipa-analyzer --depth standard ."     全量分析
 #   "/rpa-ipa-analyzer 更新分析报告"            增量（模式 update）
@@ -66,8 +76,9 @@ rpa-ipa-analyzer/                 # GitHub 仓库
 │   └── rpa-ipa-analyzer/         # 唯一 Agent Skill
 │       ├── SKILL.md              # analyze | update | audit
 │       ├── VERSION
-│       ├── scripts/              # extract/list/stats/trace/compare/diff/skeleton/patch
+│       ├── scripts/              # extract/list/stats/trace/compare/diff/skeleton/patch/apply
 │       └── references/
+├── docs/superpowers/specs/       # 设计规格（含 apply）
 ├── evals/                        # 回归测试
 ├── platforms/                    # Codex / OpenClaw 适配
 ├── README.md
