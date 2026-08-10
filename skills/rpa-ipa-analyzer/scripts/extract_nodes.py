@@ -10,6 +10,7 @@ Usage:
     python extract_nodes.py diff <project_path> [--json] [--out changed.json]
     python extract_nodes.py skeleton <project_path> [--depth quick|standard|deep]
     python extract_nodes.py patch <report.md> [--node N] [--from-file f] [--delete] [--meta ...]
+    python extract_nodes.py apply <project_path> [--dry-run] [--node N] [--file PATH] [--force]
 """
 from __future__ import annotations
 import argparse, json, sys
@@ -214,6 +215,20 @@ def main():
     p_patch.add_argument("--meta")
     p_patch.add_argument("--dry-run", action="store_true")
 
+    p_apply = sub.add_parser(
+        "apply",
+        help="将 .extracted_nodes 中修改后的代码精准写回对应 flow JSON 节点",
+    )
+    p_apply.add_argument("project_path")
+    p_apply.add_argument("--dry-run", action="store_true",
+                        help="只预览，不写盘、不备份")
+    p_apply.add_argument("--node", type=int, action="append", dest="nodes",
+                        help="节点序号，可重复，如 --node 55")
+    p_apply.add_argument("--file", action="append", dest="files",
+                        help="相对 .extracted_nodes 的文件名或 glob")
+    p_apply.add_argument("--force", action="store_true",
+                        help="即使与流程内代码 hash 一致也写入")
+
     args = parser.parse_args()
 
     if args.command == "extract" or args.command is None:
@@ -253,6 +268,21 @@ def main():
             argv.append("--dry-run")
         sys.argv = argv
         patch_main()
+    elif args.command == "apply":
+        from _extract.apply import apply_project
+        stats = apply_project(
+            args.project_path,
+            dry_run=args.dry_run,
+            node_seqs=args.nodes,
+            files=args.files,
+            force=args.force,
+        )
+        print(
+            f"[汇总] apply={stats['apply']} skip={stats['skip']} "
+            f"error={stats['error']} backups={len(stats.get('backed_up') or [])}"
+        )
+        if stats["error"]:
+            sys.exit(2)
 
 
 if __name__ == "__main__":

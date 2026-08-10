@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.3.0 (2026-08-10)
+
+### Added
+- **`extract_nodes.py apply`**：将 `.extracted_nodes` 中编辑后的 `N*.py|js` 精准写回对应 flow JSON 节点（`python_script` / `js_code`）
+- **`scripts/_extract/apply.py`**：剥离 `@node` 头、hash 比对、`--dry-run` / `--node` / `--file` / `--force`、写前 `bak_apply_*` 备份
+- Spec：`docs/superpowers/specs/2026-08-10-extract-nodes-apply.md`
+
+### Changed
+- `SKILL.md`：Token 铁律增加「改代码走 apply」；版本 **3.3.0**
+
+---
 ## 3.2.0 (2026-07-28)
 
 ### Breaking Changes

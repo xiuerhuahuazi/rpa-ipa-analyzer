@@ -5,7 +5,7 @@ description: Analyze, incrementally update, or audit IPA Studio RPA projects. Tr
 
 # IPA Studio RPA Analyzer
 
-版本：**3.2.0**。`{SKILL_ROOT}` = 本技能安装目录（含 `scripts/`）。
+版本：**3.3.0**。`{SKILL_ROOT}` = 本技能安装目录（含 `scripts/`）。
 
 单一技能，三种模式（**不要**再安装 `rpa-ipa-update` / `rpa-ipa-audit`）：
 
@@ -25,6 +25,17 @@ description: Analyze, incrementally update, or audit IPA Studio RPA projects. Tr
 2. **只读产物**：`manifest.json`、`N*.py|js`、`report_skeleton.md`、`changed.json`、`project.json`、`globalParams.json`、`processResult.json`。
 3. **代码外置**：§2.2 只写路径 + hash + 业务概述；禁止贴完整源码。
 4. **按需加载**：默认不读 `ipa_format.md` / `patterns_*` / `audit_swarm.md`。
+5. **改代码走 apply**：编辑 `.extracted_nodes/N*.py|js` 后用 `apply` 写回 flow，禁止手改巨型 JSON。
+
+### 写回流程 JSON（apply）
+
+```bash
+python {SKILL_ROOT}/scripts/extract_nodes.py apply {project_path} [--dry-run] [--node N] [--file PATH] [--force]
+```
+
+- 默认只写 **hash 有变更** 的 structured 节点；`--node` / `--file` 可精选；`--dry-run` 预览。
+- 写入前备份 `{flow}.bak_apply_YYYYMMDD_HHMMSS`；剥离 `@node` 头；校验写后 hash。
+- 规格：`docs/superpowers/specs/2026-08-10-extract-nodes-apply.md`。
 
 ---
 
