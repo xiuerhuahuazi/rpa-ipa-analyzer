@@ -7,6 +7,7 @@
 
 ### Fixed
 - `generate_skeleton.py`：支持 `globalParams.json` 为**顶层数组**的形态（原先只处理 dict，导致 §3.1 恒为空）。
+- `SKILL.md`：`description` 中的 ASCII 冒号+空格（`Modes: `）在严格 YAML 解析器下非法，技能会静默不加载；改为全角写法。
 - `extract_nodes.py trace`：按流程变量名与脚本内变量名双命名空间匹配；不再把途经祖先误标为生产者；跨流程时给出桥接提示。
 
 ### Changed

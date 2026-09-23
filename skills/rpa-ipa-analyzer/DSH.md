@@ -95,6 +95,47 @@ Windows 下 Python 3.8 对非 tty 的 stdout 使用 ANSI 代码页（zh-CN 为 G
 DSH 的命令执行器不保留 cwd 与变量。所以**不要**「先解析 `$PY`、再分两步调用」，
 必须每条命令都通过启动器重新解析。
 
+### 坑 4 — frontmatter 里的 ASCII `": "` 会让技能**静默不加载**
+
+DSH 用 `yaml`（eemeli/yaml）解析 frontmatter，比 Claude Code 的解析器严格。
+**未加引号的普通标量里出现 ASCII 冒号+空格就是非法 YAML**：
+
+```yaml
+# 会报 "Nested mappings are not allowed in compact mappings" → 整个技能被丢弃
+description: Analyze, incrementally update, or audit. Modes: analyze (quick/standard/deep), update, audit.
+```
+
+实测结论（用 DSH 自带解析器逐例验证）：
+
+| 写法 | 结果 |
+|---|---|
+| `Modes: analyze (quick/standard/deep)` | ❌ 解析失败 |
+| `三种模式：analyze（quick/standard/deep）`（全角冒号/括号） | ✅ |
+| 值里含 ASCII 双引号（如 `include "更新分析报告"`） | ✅ |
+| 整个值用双引号包起来并转义内部引号 | ✅ |
+
+**上游 3.3.1 的 `description` 就带 `Modes: `，在 DSH 下会直接不加载**（其他平台解析更宽松所以没暴露）。
+本仓库已改为全角写法，新增/修改 description 时请保持「普通标量内不出现 ASCII 冒号+空格」。
+
+> 排查提示：技能没出现在目录里时，先核对 frontmatter 能否解析；
+> 解析失败时 DSH 只在日志里 `warn`「skill file … ignored: invalid YAML frontmatter」，不会报错给用户。
+
+### 坑 5 — 用命令行复制安装后，DSH 可能不会立刻发现
+
+`skill-filesystem` 只在两种情况失效缓存：
+
+1. 模型侧的文件写入（`write` / `edit` 工具触发 `fs/observed`）；
+2. 被监视技能根目录的文件系统事件。
+
+而且第 1 条要求写入路径**长得像技能路径**——`<root>/<名字>/SKILL.md` 或 `<root>/<名字>.md`，
+其它文件名（如 `refresh_probe.tmp`）即使写在技能目录里也不会触发刷新。
+
+所以用 `cp -r` / `Copy-Item` 安装后，若目录此前不存在，技能可能直到下次重启才出现。
+两种即时生效的办法：
+
+- 用编辑工具改一次 `<技能根>/rpa-ipa-analyzer/SKILL.md`（哪怕只是改注释）；
+- 或重启 DSH。
+
 ## 子代理差异
 
 | Claude Code 写法 | DSH 做法 |

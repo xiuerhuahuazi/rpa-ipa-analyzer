@@ -1,6 +1,6 @@
 ---
 name: rpa-ipa-analyzer
-description: 分析、增量更新或审计 IPA Studio RPA 项目（含 project.json + 流程 JSON 的应用目录）；提取流程内 Python/JS 代码、梳理业务流程、生成 Mermaid 流程与业务规则报告。Analyze, incrementally update, or audit IPA Studio RPA projects. Triggers include "分析这个 RPA 项目", "更新分析报告", "增量更新", "审计", "audit", IPA flow understanding, Python extraction, business logic mapping. Modes: analyze (quick/standard/deep), update, audit. Token-optimized extract-first workflow.
+description: 分析、增量更新或审计 IPA Studio RPA 项目（含 project.json + 流程 JSON 的应用目录）；提取流程内 Python/JS 代码、梳理业务流程、生成 Mermaid 流程图与业务规则报告。Analyze, incrementally update, or audit IPA Studio RPA projects. Triggers include 「分析这个 RPA 项目」「更新分析报告」「增量更新」「审计」「audit」, IPA flow understanding, Python extraction, business logic mapping. 模式 analyze（quick/standard/deep）· update · audit。Token-optimized extract-first workflow.
 whenToUse: 用户要求理解、分析、增量更新报告或审计一个 IPA Studio RPA 项目时使用。
 ---
 

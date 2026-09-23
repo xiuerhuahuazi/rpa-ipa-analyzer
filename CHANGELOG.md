@@ -8,6 +8,7 @@
 
 ### Fixed
 - `generate_skeleton.py`：`globalParams.json` 为**顶层数组**时 §3.1 参数表恒为空（原实现只处理 dict 形态）。现在数组与 dict 两种形态都支持
+- `SKILL.md`：`description` 中含 ASCII 冒号+空格（`Modes: `），在严格 YAML 解析器下是非法标量，会导致技能**静默不加载**（DSH 实测：`Nested mappings are not allowed in compact mappings`）。改为全角写法 —— **上游 3.3.1 的 description 同样存在该问题**
 - `extract_nodes.py trace`：变量血缘三个缺陷 —— ① 种子只匹配脚本内变量名，导致 `trace OutputPath` / `out_workpath` 这类**流程变量名**查询恒为空；② 上游方向把途经的全部祖先误标为「生产者」；③ 不跨流程，跨子流程时下游恒为空。现按两个命名空间匹配、只标注真正的生产者/消费者、并给出跨流程桥接提示与同流程血缘链
 
 ### Changed
