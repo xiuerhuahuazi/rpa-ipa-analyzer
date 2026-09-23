@@ -1,0 +1,70 @@
+# DSH Platform Adapter for rpa-ipa-analyzer
+#
+# Unlike the Codex / OpenClaw adapters, DSH does not read this file — it only
+# reads YAML frontmatter from `skills/rpa-ipa-analyzer/SKILL.md` (name,
+# description, whenToUse, user-invocable, disable-model-invocation; the body is
+# embedded verbatim, with the skill's base directory injected separately).
+#
+# This file documents the adapter for humans and for tooling, and records the
+# two environment facts that break the upstream `python3 scripts/...` form.
+#
+# Install (user-global):
+#   cp -r skills/rpa-ipa-analyzer/* ~/.agents/skills/rpa-ipa-analyzer/
+# Install (single workspace only — wins over the user-global copy):
+#   cp -r skills/rpa-ipa-analyzer/* <workspace>/.agents/skills/rpa-ipa-analyzer/
+
+name: rpa-ipa-analyzer
+version: 3.3.1
+description: >-
+  Analyze, incrementally update, or audit IPA Studio RPA projects.
+  Modes: analyze (quick/standard/deep), update, audit.
+
+entrypoint: SKILL.md
+runtime:
+  type: python
+  min_version: "3.8"
+  wrapper:
+    windows: scripts/rpa.cmd
+    posix: scripts/rpa.sh
+
+discovery:
+  # DSH skill roots, lowest rank number wins.
+  project:
+    - <projectRoot>/.dsh/skills      # rank 100
+    - <projectRoot>/.agents/skills   # rank 200
+  user:
+    - <dshHome>/skills               # rank 400
+    - <agentsHome>/skills            # rank 500  (default ~/.agents)
+  note: >-
+    projectRoot is the nearest ancestor of cwd containing .git, falling back to
+    cwd itself. So in a workspace with no .git, <cwd>/.agents/skills is scanned.
+
+invocation:
+  tool: skill
+  name: rpa-ipa-analyzer
+  # DSH has no slash commands; trigger in natural language, e.g.
+  #   "分析这个 RPA 项目，深度 standard"
+  #   "更新分析报告" / "审计这个项目"
+  natural_language: true
+
+scripts:
+  extract: scripts/rpa.cmd extract <project_path> [--force]
+  skeleton: scripts/rpa.cmd skeleton <project_path> --depth standard
+  diff: scripts/rpa.cmd diff <project_path> --json --out <project_path>/.extracted_nodes/changed.json
+  apply: scripts/rpa.cmd apply <project_path> [--dry-run] [--node N]
+  patch: scripts/rpa.cmd patch <report> --node N --from-file node_N.md
+
+environment_notes:
+  - id: no-system-python
+    summary: >-
+      On Windows, `python` / `python3` may resolve to the Microsoft Store App
+      Execution Alias stubs (exit 9009) and `py` may report "No installed
+      Python found!". The wrapper probes RPA_IPA_PYTHON, then a .venv-py38 /
+      .venv / venv in cwd or an ancestor, then PATH, then `py -3`, validating
+      each candidate as Python >= 3.8. Exits 127 with guidance if none works.
+  - id: utf8-stdout
+    summary: >-
+      Always pass -X utf8. Without it Python 3.8 encodes stdout with the ANSI
+      code page (GBK on zh-CN Windows) while DSH decodes as UTF-8, so Chinese
+      node names arrive in the model context as mojibake while the exit code
+      stays 0. The wrapper appends -X utf8 unconditionally.
