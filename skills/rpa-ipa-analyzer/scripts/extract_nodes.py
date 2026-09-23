@@ -82,56 +82,125 @@ def cmd_trace(args):
     var = args.variable_name
     depth = args.depth or 10
 
-    if not edges:
-        print("[警告] manifest 无 edges 数据，降级为全局变量名匹配模式 [推测]")
-        producers = [n for n in m["nodes"] if var in n.get("output_vars", {})]
-        consumers = [n for n in m["nodes"] if var in n.get("input_vars", {})]
-        if producers:
-            print(f"\n[上游 - 推测生产者]")
-            for p in producers:
-                print(f"  N{p['seq']} ({p['show_name']}) → 产出 {var}")
-        if consumers:
-            print(f"\n[下游 - 推测消费者]")
-            for c in consumers:
-                print(f"  N{c['seq']} ({c['show_name']}) → 消费 {var}")
-        if not producers and not consumers:
-            print(f"变量 '{var}' 未出现在任何节点的 input_vars 或 output_vars 中")
+    # 节点的 input_vars / output_vars 是 {脚本内名: 流程变量名} 映射。
+    # 调用方可能用任一命名空间查询，因此两个命名空间都要匹配：
+    #   flow  : var 命中 value 侧，如 OutputPath / out_workpath / FlagPath
+    #   local : var 命中 key 侧，  如 OUTPUT_PATH / workpath
+    def _produces(node, mode):
+        mapping = node.get("output_vars") or {}
+        return var in (list(mapping.values()) if mode == "flow" else mapping)
+
+    def _consumes(node, mode):
+        mapping = node.get("input_vars") or {}
+        return var in (list(mapping.values()) if mode == "flow" else mapping)
+
+    all_nodes = list(nodes.values())
+    if any(_produces(n, "flow") or _consumes(n, "flow") for n in all_nodes):
+        mode = "flow"
+    else:
+        mode = "local"
+    label = "流程变量名" if mode == "flow" else "脚本内变量名"
+
+    producers = [n for n in all_nodes if _produces(n, mode)]
+    consumers = [n for n in all_nodes if _consumes(n, mode)]
+
+    if not producers and not consumers:
+        print(
+            f"变量 '{var}' 未出现在任何节点的 input_vars 或 output_vars 中"
+            f"（已按流程变量名与脚本内变量名两种命名空间查找）"
+        )
         return
 
+    def _mapping(node, field):
+        mapping = node.get(field) or {}
+        if mode == "flow":
+            hit = [f"{k} → {v}" for k, v in mapping.items() if v == var]
+        else:
+            hit = [f"{k} → {v}" for k, v in mapping.items() if k == var]
+        return "; ".join(hit) if hit else "-"
+
+    def _show(node, field, verb):
+        print(
+            f"  N{node['seq']} ({node['show_name']}) {verb} '{var}'"
+            f"  [{_mapping(node, field)}]  ({node.get('flow_file', '?')})"
+        )
+
     if args.direction in ("up", "both"):
-        rev_adj: dict[str, list[str]] = {}
-        for e in edges:
-            rev_adj.setdefault(e["targetNode"], []).append(e["sourceNode"])
-        visited = set()
-        q = deque([(nid, 0) for nid in nodes if var in nodes[nid].get("output_vars", {})])
-        print(f"\n[上游 - 生产者]")
-        while q:
-            nid, d = q.popleft()
-            if nid in visited or d > depth:
-                continue
-            visited.add(nid)
-            if nid in nodes:
-                print(f"  N{nodes[nid]['seq']} ({nodes[nid]['show_name']}) → 产出 {var}")
-            for prev in rev_adj.get(nid, []):
-                if prev not in visited:
-                    q.append((prev, d + 1))
+        print(f"\n[上游 - 生产者]（匹配方式：{label}）")
+        if producers:
+            for n in sorted(producers, key=lambda x: x["seq"]):
+                _show(n, "output_vars", "产出")
+        else:
+            print("  （无节点产出该变量；它可能来自项目参数 globalParams.json 或流程 global_vars）")
 
     if args.direction in ("down", "both"):
-        adj: dict[str, list[str]] = {}
-        for e in edges:
-            adj.setdefault(e["sourceNode"], []).append(e["targetNode"])
-        visited = set()
-        q = deque([(nid, 0) for nid in nodes if var in nodes[nid].get("output_vars", {})])
-        print(f"\n[下游 - 消费者]")
+        print(f"\n[下游 - 消费者]（匹配方式：{label}）")
+        if consumers:
+            for n in sorted(consumers, key=lambda x: x["seq"]):
+                _show(n, "input_vars", "消费")
+        else:
+            print("  （无节点消费该变量）")
+
+    # IPA 每个 flow 文件各有一份 global_vars[]，跨流程必须两侧都登记。
+    flows_used = sorted({n.get("flow_file", "?") for n in producers + consumers})
+    if len(flows_used) > 1:
+        print(f"\n[跨流程] 该变量出现在 {len(flows_used)} 个流程文件：{', '.join(flows_used)}")
+        print(
+            "  硬约束：生产侧与消费侧流程的 global_vars 都要登记该 key，"
+            "否则运行报「出参定义解析失败，变量/参数表内不存在【xxx】」。"
+        )
+        for b in all_nodes:
+            is_sub = str(b.get("node_id", "")).startswith("sub_process") or str(b.get("component") or "") == "sub_process"
+            if is_sub:
+                print(f"  子流程桥接：N{b['seq']} ({b['show_name']})  ({b.get('flow_file', '?')})")
+
+    if not edges:
+        print("\n[提示] manifest 无 edges 数据，无法还原执行路径。")
+        return
+
+    # 血缘链：只在「同一流程文件内」的生产者→消费者之间沿 edges 求最短路径。
+    # 只打印真正产出/消费该变量的节点，不再把途经的祖先误标为「生产者」。
+    adj = {}
+    for e in edges:
+        adj.setdefault(e["sourceNode"], []).append(e["targetNode"])
+
+    def _path(src, dst, limit):
+        q = deque([(src, [src])])
+        seen = {src}
         while q:
-            nid, d = q.popleft()
-            if nid in visited or d > depth:
+            nid, path = q.popleft()
+            if nid == dst:
+                return path
+            if len(path) - 1 >= limit:
                 continue
-            visited.add(nid)
             for nxt in adj.get(nid, []):
-                if nxt not in visited and nxt in nodes and var in nodes[nxt].get("input_vars", {}):
-                    print(f"  N{nodes[nid]['seq']}/{var} → N{nodes[nxt]['seq']} ({nodes[nxt]['show_name']}) → 消费 {var}")
-                    q.append((nxt, d + 1))
+                if nxt not in seen:
+                    seen.add(nxt)
+                    q.append((nxt, path + [nxt]))
+        return None
+
+    chains = []
+    for p in producers:
+        for c in consumers:
+            if p["node_id"] == c["node_id"] or p.get("flow_file") != c.get("flow_file"):
+                continue
+            found = _path(p["node_id"], c["node_id"], depth)
+            if found:
+                chains.append((p, found))
+
+    if chains:
+        print("\n[血缘链]（同流程内沿 edges 的最短执行路径）")
+        for p, path in chains:
+            hops = " → ".join(
+                f"N{nodes[x]['seq']}" if x in nodes else str(x) for x in path
+            )
+            print(f"  {hops}   （{p.get('flow_file', '?')}）")
+    elif producers and consumers:
+        print(
+            "\n[血缘链] 无同流程内的生产者→消费者直连路径"
+            "（生产与消费为同一节点、二者不在同一流程文件，或其间无 edges 连通；"
+            "跨流程连接由 sub_process 节点承担，manifest edges 不跨文件）。"
+        )
 
 
 def cmd_compare(args):
