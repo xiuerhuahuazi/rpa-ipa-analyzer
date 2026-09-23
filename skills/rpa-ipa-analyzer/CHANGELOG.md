@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Added
+- DSH 平台适配：`DSH.md` 说明加载契约、安装位置与三个环境坑；`scripts/rpa.cmd` / `scripts/rpa.sh` 跨平台启动器（自动解析 Python 3.8+，固定 `-X utf8`）。
+
+### Fixed
+- `generate_skeleton.py`：支持 `globalParams.json` 为**顶层数组**的形态（原先只处理 dict，导致 §3.1 恒为空）。
+- `SKILL.md`：`description` 中的 ASCII 冒号+空格（`Modes: `）在严格 YAML 解析器下非法，技能会静默不加载；改为全角写法。
+- `extract_nodes.py trace`：按流程变量名与脚本内变量名双命名空间匹配；不再把途经祖先误标为生产者；跨流程时给出桥接提示。
+
+### Changed
+- `SKILL.md`：新增「第 0 步：解释器与调用」，脚本一律经启动器调用；新增 DSH 子代理映射表。
+
 ## [3.3.1] - 2026-08-10
 
 ### Added
