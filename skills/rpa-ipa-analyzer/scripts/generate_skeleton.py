@@ -218,7 +218,12 @@ def generate(project_path: str, depth: str = "standard") -> Path:
     lines.append("|---|---------|------|------|--------|----------|")
     # globalParams shapes vary
     params = []
-    if isinstance(gparams, dict):
+    if isinstance(gparams, list):
+        # IPA Studio commonly writes globalParams.json as a TOP-LEVEL ARRAY of
+        # {id, key, type, description, value} objects. The dict-only branches
+        # below silently produced an empty §3.1 table for every such project.
+        params = [p for p in gparams if isinstance(p, dict)]
+    elif isinstance(gparams, dict):
         if "globalParams" in gparams and isinstance(gparams["globalParams"], list):
             params = gparams["globalParams"]
         elif "params" in gparams and isinstance(gparams["params"], list):
