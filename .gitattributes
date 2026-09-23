@@ -1,0 +1,15 @@
+# Keep the cross-platform launchers byte-identical on every checkout.
+#
+# core.autocrlf=true is common on Windows and rewrites text files to CRLF on
+# checkout. For rpa.sh that breaks the `#!/usr/bin/env sh` interpreter line
+# (and every embedded command) as soon as the skill is copied into a POSIX
+# environment, so it must stay LF regardless of the local autocrlf setting.
+# rpa.cmd is pinned to LF as well so both launchers behave the same way and
+# the tree does not drift between platforms.
+#
+# Scope is deliberately limited to these two paths: the rest of the repository
+# predates this file and is checked out as CRLF on Windows, so adding blanket
+# `text` attributes elsewhere would produce a large renormalisation diff.
+
+*.sh  text eol=lf
+*.cmd text eol=lf
