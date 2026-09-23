@@ -298,6 +298,37 @@ def main():
     p_apply.add_argument("--force", action="store_true",
                         help="即使与流程内代码 hash 一致也写入")
 
+    def _add_node_selector(p):
+        g = p.add_mutually_exclusive_group(required=True)
+        g.add_argument("--node", type=int, dest="node_seq", help="节点序号 N，如 --node 22")
+        g.add_argument("--id", dest="node_id", help="节点 ID，如 --id script_python_execute4098849778077")
+
+    p_mapping = sub.add_parser(
+        "mapping",
+        help="补丁节点入/出参映射与流程 global_vars（apply 不改这些字段）",
+    )
+    p_mapping.add_argument("project_path")
+    _add_node_selector(p_mapping)
+    p_mapping.add_argument("--input", action="append", default=[], dest="inputs",
+                           metavar="脚本名=流程变量名", help="设置/覆盖入参映射，可重复")
+    p_mapping.add_argument("--output", action="append", default=[], dest="outputs",
+                           metavar="脚本名=流程变量名", help="设置/覆盖出参映射，可重复")
+    p_mapping.add_argument("--remove-input", action="append", default=[], dest="del_inputs",
+                           metavar="脚本名", help="删除入参映射，可重复")
+    p_mapping.add_argument("--remove-output", action="append", default=[], dest="del_outputs",
+                           metavar="脚本名", help="删除出参映射，可重复")
+    p_mapping.add_argument("--ensure-global-var", action="append", default=[],
+                           dest="ensure_global_vars", metavar="KEY",
+                           help="在该流程 global_vars 中登记 key（缺则新增），可重复")
+    p_mapping.add_argument("--description", default="", help="配合 --ensure-global-var 的说明文字")
+    p_mapping.add_argument("--dry-run", action="store_true")
+
+    p_remove = sub.add_parser("remove-node", help="删除孤立节点（默认拒绝删除仍被引用的节点）")
+    p_remove.add_argument("project_path")
+    _add_node_selector(p_remove)
+    p_remove.add_argument("--force", action="store_true", help="即使仍被引用也强行删除")
+    p_remove.add_argument("--dry-run", action="store_true")
+
     args = parser.parse_args()
 
     if args.command == "extract" or args.command is None:
@@ -352,6 +383,51 @@ def main():
         )
         if stats["error"]:
             sys.exit(2)
+    elif args.command == "mapping":
+        from pathlib import Path as _Path
+        from _extract.patch import patch_mapping
+        ref = {"node_id": args.node_id} if args.node_id else {"seq": args.node_seq}
+        st = patch_mapping(
+            _Path(args.project_path),
+            ref,
+            set_inputs=args.inputs,
+            set_outputs=args.outputs,
+            del_inputs=args.del_inputs,
+            del_outputs=args.del_outputs,
+            global_var_needs=args.ensure_global_vars,
+            description=args.description,
+            dry_run=args.dry_run,
+        )
+        tag = "[dry-run] " if st.get("dry_run") else ""
+        print(f"{tag}N{st['seq']} {st['node_id']} @ {st['flow']}")
+        for k in st["global_vars_added"]:
+            print(f"  [global_vars] + {k}")
+        for v in st["input_added"]:
+            print(f"  [入参] + {v}")
+        for v in st["output_added"]:
+            print(f"  [出参] + {v}")
+        for v in st["removed"]:
+            print(f"  [删除映射] {v}")
+        for w in st["warnings"]:
+            print(f"  [警告] {w}")
+        if st.get("backup"):
+            print(f"  [备份] {st['backup']}")
+        if not (st["input_added"] or st["output_added"] or st["removed"] or st["global_vars_added"]):
+            print("  （没有变化）")
+    elif args.command == "remove-node":
+        from pathlib import Path as _Path
+        from _extract.patch import remove_node
+        ref = {"node_id": args.node_id} if args.node_id else {"seq": args.node_seq}
+        st = remove_node(_Path(args.project_path), ref, force=args.force, dry_run=args.dry_run)
+        tag = "[dry-run] " if st.get("dry_run") else ""
+        print(f"{tag}N{st['seq']} ({st['show_name']}) {st['node_id']} @ {st['flow']}")
+        print(f"  nodes {st['nodes_before']} → {st['nodes_after']}")
+        if st.get("backup"):
+            print(f"  [备份] {st['backup']}")
+        if st["refs"]:
+            print("  [强制删除] 仍被引用：")
+            for r in st["refs"]:
+                print(f"    - {r}")
 
 
 if __name__ == "__main__":

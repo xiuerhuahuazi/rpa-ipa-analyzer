@@ -87,8 +87,49 @@ $PY = "$PWD\.venv-py38\Scripts\python.exe"   # 或 $env:RPA_IPA_PYTHON
 
 - 默认只写 **hash 有变更** 的 structured 节点；`--node` / `--file` / `--force` 可精选。退出码 `2` 表示有节点写入失败。
 - 写入前备份 `{flow}.bak_apply_YYYYMMDD_HHMMSS`；剥离 `@node` 头；校验写后 hash。
-- **`apply` 只改 `python_script`/`js_code`**，不改 `global_vars`、`python_input_variables`、`_script_execute_result`、子流程 `input_variables` —— 这些须另补丁。
+- **`apply` 只改 `python_script`/`js_code`**，不改 `global_vars`、`python_input_variables`、`_script_execute_result`、子流程 `input_variables` —— 这些用下面的 `mapping` 补丁。
 - 规格：`docs/superpowers/specs/2026-08-10-extract-nodes-apply.md`（技能仓库）。
+
+### 补丁入/出参映射与流程变量（mapping）
+
+改脚本 I/O 时，光改代码不够 —— 映射与 `global_vars` 必须同步，否则运行报
+「出参定义解析失败，变量/参数表内不存在【xxx】」。`apply` 不管这些字段，用 `mapping`：
+
+```bash
+# 增加/覆盖入参映射（脚本内名=流程变量名）
+"<SK>/scripts/rpa.cmd" mapping "<project_path>" --node 22 --input logger=logger
+
+# 出参映射到一个还没登记的流程变量 -> 直接报错，并提示如何补齐
+"<SK>/scripts/rpa.cmd" mapping "<project_path>" --node 22 --output RESULT=MyVar
+#   错误: 出参 value 'MyVar' 未在流程 业务流程/主业务.json 的 global_vars 中登记。
+
+# 先登记再映射（一步到位）
+"<SK>/scripts/rpa.cmd" mapping "<project_path>" --node 22 \
+    --output RESULT=MyVar --ensure-global-var MyVar --description "稽核结论"
+
+"<SK>/scripts/rpa.cmd" mapping "<project_path>" --node 22 --remove-input old_name
+"<SK>/scripts/rpa.cmd" mapping "<project_path>" --node 22 --dry-run
+```
+
+- 节点选择：`--node N`（提取序号）或 `--id <node_id>`，二选一。
+- **硬约束自动校验**：出参映射的 value 必须是该流程 `global_vars` 里已登记的 key，
+  否则命令直接失败（`--ensure-global-var` 可顺手补登记）；入参映射的 value 若既不在
+  `global_vars` 也不在 `globalParams.json`，只告警不阻断。
+- 写入前备份 `{flow}.bak_mapping_*`，且保持原文件的紧凑 JSON 与行尾风格。
+
+### 删除孤立节点（remove-node）
+
+流程里常残留上一代版本的死节点（无 edges、无引用），会误导后续维护：
+
+```bash
+"<SK>/scripts/rpa.cmd" remove-node "<project_path>" --node 20 --dry-run
+"<SK>/scripts/rpa.cmd" remove-node "<project_path>" --node 20
+```
+
+- **默认拒绝**删除仍被引用的节点，并列出全部引用（edges + 其它节点字段里的 id）；
+  确认无误后再加 `--force`。
+- 写入前备份 `{flow}.bak_remove-node_*`。
+- 删除后节点序号会整体前移，记得重新 `extract` 并用 `diff` 确认。
 
 ### 变量/参数铁律（IPA 运行时）
 
@@ -156,6 +197,10 @@ standard 且代码节点 >200：按 `code_hash` 去重深读。
 | 禁止整份报告进上下文重写 | 只用 diff 列表 + 单节点片段 + patch |
 | `recommend=incremental`（delta≤5） | 增量 |
 | delta>5 / 子流程大变 / 章节断裂 | 改走 analyze |
+
+`diff` 优先用 `previous_manifest.json` **按 `node_id` 比对**，所以增删节点不会让其后所有节点
+被误报为变更。只有在没有 `previous_manifest.json` 时才退回 `hash_snapshot.txt`（仅有序号，
+此时增删节点会导致大面积误报，命令会打印提示）。`--json` 的每条记录都带 `node_id`。
 
 I/O 变：`trace --direction up|down`。
 

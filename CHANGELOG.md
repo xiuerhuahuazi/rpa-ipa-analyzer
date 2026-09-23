@@ -5,14 +5,22 @@
 ### Added
 - **DSH 平台适配**：`platforms/dsh/dsh.yaml` + `skills/rpa-ipa-analyzer/DSH.md`；技能正文改用 `<SK>` 约定（DSH 不替换 `{SKILL_ROOT}` 占位符，只注入技能基目录）
 - **跨平台启动器 `scripts/rpa.cmd` / `scripts/rpa.sh`**：自动解析 Python 3.8+ 解释器（`$RPA_IPA_PYTHON` → 项目虚拟环境 → PATH → `py -3`，逐个校验版本），并固定附加 `-X utf8`
+- **`extract_nodes.py mapping`**：补丁节点入/出参映射与流程 `global_vars`。`apply` 明确不改这些字段，此前只能手写脚本。出参映射的 value 必须是该流程已登记的 `global_vars` key，否则直接失败（`--ensure-global-var` 可顺手补登记）；入参映射 value 既不在 `global_vars` 也不在 `globalParams.json` 时告警
+- **`extract_nodes.py remove-node`**：删除孤立死节点。默认**拒绝**删除仍被引用的节点并列出全部引用（edges + 其它节点字段中的 id），确认后才需 `--force`
+- **`evals`: `patch_operations`** 用例：在 golden baseline 的临时副本上端到端验证上述两个子命令，并断言「声明未登记的出参会被拒绝」「仍被引用的节点不会被删」
 
 ### Fixed
+- `_extract/manifest.py`：抽取出的 `N*.py|js` 在 Windows 上被写成 **CRCRLF**（文本模式写把代码里已有的 `\r\n` 又翻译了一次）。读回时 `\r\r\n` 会折叠成 `\n\n`，于是**正常的「extract → 编辑 → apply」回路会把成倍空行写回流程 JSON**。改为 `newline=""` 写入。实测某节点 808 处 `\r\r\n` 归零，且未编辑时 `apply` 正确全部按 hash 跳过
+- `diff_nodes.py`：按 `seq` 比对，导致增删一个节点后其后所有节点都被误报为「代码变更」。现优先用 `previous_manifest.json` **按 `node_id`** 比对；实测同一场景由「delta=4」变为准确的「删除 1 / delta=1」。旧快照缺 id 时退回原逻辑并打印提示。`--json` 每条记录新增 `node_id`，顶层新增 `basis`
+- `evals_runner.py`：① `subprocess(..., text=True)` 用本地编码解码子进程输出，在 zh-CN Windows 上遇到中文即 `UnicodeDecodeError`（CI 在 Linux 上碰不到）—— 改为显式 `encoding="utf-8"`；② 自身 stdout 未固定编码，中文结果在 Windows 上乱码 —— 启动时 `reconfigure(encoding="utf-8")`
 - `generate_skeleton.py`：`globalParams.json` 为**顶层数组**时 §3.1 参数表恒为空（原实现只处理 dict 形态）。现在数组与 dict 两种形态都支持
 - `SKILL.md`：`description` 中含 ASCII 冒号+空格（`Modes: `），在严格 YAML 解析器下是非法标量，会导致技能**静默不加载**（DSH 实测：`Nested mappings are not allowed in compact mappings`）。改为全角写法 —— **上游 3.3.1 的 description 同样存在该问题**
 - `extract_nodes.py trace`：变量血缘三个缺陷 —— ① 种子只匹配脚本内变量名，导致 `trace OutputPath` / `out_workpath` 这类**流程变量名**查询恒为空；② 上游方向把途经的全部祖先误标为「生产者」；③ 不跨流程，跨子流程时下游恒为空。现按两个命名空间匹配、只标注真正的生产者/消费者、并给出跨流程桥接提示与同流程血缘链
 
 ### Changed
-- `SKILL.md`：新增「第 0 步：解释器与调用」，统一改用启动器调用；补充「子代理差异（Claude Code ↔ DSH）」
+- `SKILL.md`：新增「第 0 步：解释器与调用」，统一改用启动器调用；补充「子代理差异（Claude Code ↔ DSH）」；新增 `mapping` / `remove-node` 用法与 `diff` 比对基准说明
+- `apply` / `mapping` / `remove-node` 的写盘改为 `newline=""`，行尾风格在 Windows 与 Linux 上一致
+- `evals_runner.py --all` 现在会快照并还原 `component_usage_counts.json` 与 golden fixture 目录，跑完不再弄脏工作区，可重复执行
 
 ---
 
