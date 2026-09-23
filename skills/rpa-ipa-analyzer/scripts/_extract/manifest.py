@@ -1,5 +1,5 @@
 from __future__ import annotations
-import json, sys
+import json, re, sys
 from datetime import date
 from pathlib import Path
 from .core import safe_name, flow_shortname
@@ -97,13 +97,19 @@ def extract_project(project_path: str, force: bool = False,
                 header = node_header_python(meta.__dict__, seq)
                 stats["py"] += 1
                 filename = f"N{seq}_{short}{block_suffix}_{sname}{meta.ext}"
-                with open(out_dir / filename, "w", encoding="utf-8") as f:
+                # newline="" is required: the code already carries the flow's own
+                # CRLF, and a text-mode write would retranslate every \n to
+                # os.linesep, turning each CRLF into CRCRLF on Windows. Reading
+                # such a file back collapses \r\r\n to \n\n, so a normal
+                # extract -> edit -> apply round-trip injected blank lines into
+                # the flow JSON.
+                with open(out_dir / filename, "w", encoding="utf-8", newline="") as f:
                     f.write(header + "\n" + meta.code + "\n")
             else:
                 header = node_header_js(meta.__dict__, seq)
                 stats["js"] += 1
                 filename = f"N{seq}_{short}{block_suffix}_{sname}{meta.ext}"
-                with open(out_dir / filename, "w", encoding="utf-8") as f:
+                with open(out_dir / filename, "w", encoding="utf-8", newline="") as f:
                     f.write(header + "\n" + meta.code + "\n")
 
             if not is_heuristic:
@@ -152,6 +158,21 @@ def extract_project(project_path: str, force: bool = False,
         "nodes": all_metas,
         "_schema_version": "2.0",
     }
+    # Drop node artifacts for nodes that no longer exist (e.g. after remove-node).
+    # Only this extractor's own N<seq>_* files are touched; manifest.json,
+    # hash_snapshot.txt, previous_manifest.json and report_skeleton.md are kept.
+    produced = {str(n.get("file", "")) for n in all_metas if n.get("file")}
+    for stale in sorted(out_dir.iterdir()):
+        if not stale.is_file() or stale.name in produced:
+            continue
+        if not re.match(r"^N\d+_", stale.name):
+            continue
+        try:
+            stale.unlink()
+            print(f"  [清理] 删除过期节点产物 {stale.name}")
+        except OSError as exc:
+            print(f"  [警告] 无法删除过期产物 {stale.name}: {exc}")
+
     manifest_path = out_dir / "manifest.json"
     with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
