@@ -281,9 +281,9 @@ def plan_apply(
     return plans
 
 
-def backup_flow(flow_path: Path) -> Path:
+def backup_flow(flow_path: Path, tag: str = "apply") -> Path:
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    bak = flow_path.with_name(f"{flow_path.name}.bak_apply_{ts}")
+    bak = flow_path.with_name(f"{flow_path.name}.bak_{tag}_{ts}")
     shutil.copy2(flow_path, bak)
     return bak
 
@@ -359,7 +359,10 @@ def execute_plans(project: Path, plans: list[dict], dry_run: bool) -> dict:
             out += nl
         elif raw.endswith("\n") and not out.endswith("\n"):
             out += "\n"
-        flow_path.write_text(out, encoding="utf-8")
+        # open() rather than Path.write_text: `newline=` on write_text needs 3.10
+        # and this project supports 3.8+. newline="" keeps the bytes we built.
+        with open(flow_path, "w", encoding="utf-8", newline="") as fh:
+            fh.write(out)
         print(f"[保存] {flow_path.name}")
 
     return stats
