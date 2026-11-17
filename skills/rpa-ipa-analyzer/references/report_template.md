@@ -2,6 +2,18 @@
 
 > 项目版本：{version} | 设计器：{designer_version} | 执行器：{executor_version} | 分析日期：{date} | 项目类型：{data_processing / web_automation / mixed} | 分析深度：{quick / standard / deep}
 
+> **Mermaid 硬约束（技能 3.3.3 起，交付前必查）**
+> ① 边标签禁止 `( ) [ ] { } ;`——`-->|int(total) != 0|` 会让 mermaid 整图报错，
+> 应写 `-->|total!=0|`，或把条件放进节点标签 `IF{"total!=0?"}`（别用 `"` 包边标签，v10+ 才支持）；
+> ② **节点 / 子图标签一律加引号** `A["文字"]`、`subgraph L0["标题"]`——未加引号时括号同样整图不渲染
+> （`G1[…(…)]` 实测 `got 'PS'`，3.3.3 起由 E10 拦下），括号/斜杠/冒号/箭头只许出现在引号内；
+> ③ 虚线边带文字只能写 `A -. 文字 .-> B` 或 `A -.->|文字| B`，`-.文字.->` 非法（E11）；
+> ④ 单图宽度 ≤ ~1300px：节点 >20 或回边 >4 就拆图，`flowchart LR` 节点 >12 改 `TB`；
+> ⑤ `stateDiagram` 用 `state "文案" as s0` 别名，不要裸中文状态 ID；
+> ⑥ 每张图配 `**图 N：xxx**` 小标题，且正文有对应文字说明。
+> 定稿前跑 `& "<SK>\scripts\rpa.cmd" check-mermaid --self-test` +
+> `& "<SK>\scripts\rpa.cmd" check-mermaid "<report>"`，**两步都 exit 0 才交付**。细则见 `references/mermaid_check.md`。
+
 ---
 
 ## 报告章节 ↔ 分析层映射

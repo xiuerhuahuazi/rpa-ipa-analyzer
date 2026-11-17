@@ -87,7 +87,10 @@ def extract_project(project_path: str, force: bool = False,
             is_heuristic = meta.extraction_method == "heuristic"
             short = flow_shortname(flow_path_rel)
             sname = safe_name(meta.show_name)
-            block_suffix = f"_{safe_name(meta.parent_block, 12)}" if meta.parent_block else ""
+            # 文件名只体现最内层所属块（parent_block 用 :: 拼接层级路径），
+            # 避免长路径把文件名撑爆；截断长度放宽到默认 20。
+            leaf_block = meta.parent_block.split("::")[-1] if meta.parent_block else ""
+            block_suffix = f"_{safe_name(leaf_block)}" if leaf_block else ""
 
             if is_heuristic:
                 filename = f"N{seq}_{short}{block_suffix}_{sname}.heuristic.json"
