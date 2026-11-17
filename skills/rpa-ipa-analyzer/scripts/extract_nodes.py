@@ -11,6 +11,7 @@ Usage:
     python extract_nodes.py skeleton <project_path> [--depth quick|standard|deep]
     python extract_nodes.py patch <report.md> [--node N] [--from-file f] [--delete] [--meta ...]
     python extract_nodes.py apply <project_path> [--dry-run] [--node N] [--file PATH] [--force]
+    python extract_nodes.py check-mermaid <report.md|dir> [...] [--strict]
 """
 from __future__ import annotations
 import argparse, json, sys
@@ -329,6 +330,15 @@ def main():
     p_remove.add_argument("--force", action="store_true", help="即使仍被引用也强行删除")
     p_remove.add_argument("--dry-run", action="store_true")
 
+    p_mm = sub.add_parser(
+        "check-mermaid",
+        help="检查报告里的 Mermaid 图（边标签/节点标签括号等硬约束；定稿前必跑）",
+    )
+    p_mm.add_argument("paths", nargs="*", help=".md / .mmd 文件或目录（必填；配合 --self-test 时可省略）")
+    p_mm.add_argument("--strict", action="store_true", help="WARN 也视为失败")
+    p_mm.add_argument("--self-test", action="store_true", dest="mermaid_self_test",
+                      help="跑内置回归用例（两起事故的写法必须被抓到）")
+
     args = parser.parse_args()
 
     if args.command == "extract" or args.command is None:
@@ -428,6 +438,14 @@ def main():
             print("  [强制删除] 仍被引用：")
             for r in st["refs"]:
                 print(f"    - {r}")
+    elif args.command == "check-mermaid":
+        from _extract.mermaid import check_paths, self_test
+        if args.mermaid_self_test:
+            sys.exit(self_test())
+        if not args.paths:
+            print("[check-mermaid] 用法：check-mermaid <file|dir> [...] [--strict] [--self-test]")
+            sys.exit(2)
+        sys.exit(check_paths(args.paths, strict=args.strict))
 
 
 if __name__ == "__main__":

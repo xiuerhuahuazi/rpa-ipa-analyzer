@@ -6,7 +6,7 @@ whenToUse: 用户要求理解、分析、增量更新报告或审计一个 IPA S
 
 # IPA Studio RPA Analyzer
 
-版本：**3.3.1**。`<SK>` = 本技能安装目录（含 `scripts/`）。
+版本：**3.3.4**。`<SK>` = 本技能安装目录（含 `scripts/`）。
 下文所有路径都相对 `<SK>` 解析；平台若注入「技能基目录 / skill base directory」提示，以该提示为准。
 
 支持的平台：Claude Code / Cursor / OpenAI Codex / OpenClaw / **DSH**（适配说明见 `<SK>/DSH.md`）。
@@ -76,6 +76,9 @@ $PY = "$PWD\.venv-py38\Scripts\python.exe"   # 或 $env:RPA_IPA_PYTHON
 4. **按需加载**：默认不读 `references/ipa_format.md` / `patterns_*` / `audit_swarm.md`。
 5. **改代码走 apply**：编辑 `.extracted_nodes/N*.py|js` 后用 `apply` 写回 flow，禁止手改巨型 JSON。
 6. **变量分域必登记**：新增脚本出参/入参映射前，先在对应流程 `global_vars`（及跨流程时目标流程）登记 `key`；详见下方「变量/参数铁律」。
+7. **块可多层嵌套，级数不设限**：`process_function_block` 在任意深度都按 `blocks[]` 递归抽取（3.3.4 起；此前只展开一层，二级块整块漏抽）。
+   `parent_block` 用 `::` 拼层级路径（`远程文件执行-流程块::流程块-第一批版本识别`），落盘文件名只取最内层块名。
+   **序号会重排**：同一节点在不同版本的 `extract` 里 N 号可以差很远，`apply --node N` 与报告里的 N 号一律以**当前** `manifest.json` 为准，改版后先重抽。
 
 ### 写回流程 JSON（apply）
 
@@ -152,6 +155,50 @@ Agent 改脚本 I/O 时**必须**遵守，否则运行报「出参定义解析�
 
 详情与字段形状：`references/ipa_format.md` §变量作用域与脚本映射。
 查血缘用 `trace`：既可用**流程变量名**（如 `OutputPath`、`out_workpath`），也可用**脚本内变量名**（如 `OUTPUT_PATH`）。
+
+---
+
+## Mermaid 铁律（报告图表，3.3.2 新增，3.3.3 扩充）
+
+**背景（两起实测事故，都是「图整张不渲染、正文正常」）**：
+
+```
+# 事故 1：边标签里的括号
+Main -->|int(total) != 0| Borrow      ← mermaid 11.17.2: Parse error ... got 'PS'
+
+# 事故 2：节点标签未加引号 + 括号（3.3.3 补的漏网之鱼）
+G1[查找JSON → 数据合并(三分组去重) → EXCEL美化(3 sheet+判断点公式)]
+                                      ← Parse error on line 15 ... got 'PS'
+G1["查找JSON → 数据合并(三分组去重) → EXCEL美化(3 sheet+判断点公式)"]   ← 正确
+```
+
+结论：**括号 `( ) [ ] { }` 在未加引号的标签里都属于形状语法**——边标签、节点标签、
+子图标题都算；`| ;` 同理会截断语句。
+
+报告的图**必须**满足：
+
+1. **边标签是纯文本**：禁止 `( ) [ ] { } ;`；也不要用 `"` 包裹（仅 mermaid ≥10 支持，旧渲染器会挂）。
+   条件写成 `total!=0` / `IsOpen=True`，或把判断放进带引号的节点标签：`IF2{"total!=0?"}`。
+2. **节点标签 / 子图标题一律加双引号**：`A["文字"]`、`subgraph L0["主控层 主流程"]`；括号、斜杠、冒号、
+   箭头只能出现在引号内。**不要只在「看起来有特殊字符」时才加引号**——检查器对未加引号且含括号的标签直接判 ERROR。
+3. **虚线边带文字只有两种合法写法**：`A -. 文字 .-> B` 或 `A -.->|文字| B`；
+   `A -.文字.-> B` 会解析失败。
+4. **控制尺寸**：宽度目标 ≤ ~1300px。节点 >20 或回边 >4 就拆图（调用链 / 数据流分开）；
+   横向图（`LR`）节点 >12 时改 `TB` —— 否则缩到页宽后字只有 4px 左右。
+5. **stateDiagram 用别名**：`state "未处理" as s0` 再引用 `s0`，不要裸中文状态 ID。
+6. **每张图配小标题 + 正文说明**，图不能是唯一信息载体。
+
+**定稿前必跑（exit 2 必须修，0 才能交付）**：
+
+```powershell
+& "<SK>\scripts\rpa.cmd" check-mermaid --self-test                          # 检查器自检（12 例）
+& "<SK>\scripts\rpa.cmd" check-mermaid "<project>\分析报告_xxx.md"          # 报告：ERROR 0 才交付
+& "<SK>\scripts\rpa.cmd" check-mermaid "<project>" --strict                 # 连 WARN 一起清零
+```
+
+检查器：`scripts/_extract/mermaid.py`（纯标准库）。ERROR 10 条（E1–E11，E3 空号）/ WARN 7 条（W1–W7）；
+规则表、两起事故复盘、经验尺寸、可选的「同版本无头浏览器真渲染」配方见
+**`references/mermaid_check.md`**。
 
 ---
 
@@ -246,5 +293,7 @@ I/O 变：`trace --direction up|down`。
 
 - 未整段贴源码；§2.2 含 `.extracted_nodes/` 引用
 - analyze：Mermaid / 参数表 / 附录 B；standard+ 含 §4/§5.3/§5.4
+- **Mermaid 图通过 `check-mermaid`（ERROR 0）**；边标签无括号、**节点/子图标签全部带引号**、
+  虚线边用 `-. 文字 .->`；图宽 ≤ ~1300px，图有标题与正文说明；定稿前跑过 `check-mermaid --self-test`
 - audit：`AUDIT_REPORT.md` 或标 INCOMPLETE
 - 脚本输出未见乱码（`��`），命令均通过 `rpa.cmd` / `rpa.sh` 调用

@@ -51,9 +51,30 @@ DSH **没有** `/<skill-name>` 斜杠命令，也不会自动执行技能。触�
 ```powershell
 & "<SK>\scripts\rpa.cmd" extract  "<project_path>" --force
 & "<SK>\scripts\rpa.cmd" skeleton "<project_path>" --depth standard
+& "<SK>\scripts\rpa.cmd" check-mermaid --self-test       # 检查器自检（12 例），改规则后必跑
+& "<SK>\scripts\rpa.cmd" check-mermaid "<report.md>"     # 报告定稿前必跑，exit 0 才交付
 ```
 
 Linux / macOS 用 `<SK>/scripts/rpa.sh`。
+
+### DSH 特有的 Mermaid 风险（3.3.2 起，3.3.3 补节点标签）
+
+DSH 桌面端 **会渲染 markdown 里的图**，所以图语法错 = 用户看到报错框。实测 2026-10-27 一天内
+连踩两次：**边标签**写 `-->|int(total) != 0|`、**节点标签**写 `G1[…(…)]` 未加引号——都报
+`Parse error ... got 'PS'`，整图不渲染。自 3.3.3 起 `check-mermaid` 两类都拦（E2 / E10），
+且 W7 会汇总提示未加引号的节点标签。
+
+渲染器版本取自桌面 profile 的依赖，可查：
+
+```powershell
+Select-String "$env:USERPROFILE\.dsh\profiles\desktop\pnpm-lock.yaml" -Pattern 'mermaid@'
+#   实测 2026-10 为 mermaid@11.17.2
+```
+
+要 100% 确认渲染，用**同版本** mermaid 在无头 Chrome 里跑一遍（配方见
+`references/mermaid_check.md` §5）。注意 `addScriptTag({content})` 注入 UMD；
+直接 `<script src="file://...">` 不挂 `window.mermaid`，会误报
+`Cannot read properties of undefined (reading 'initialize')`。
 
 ## 两个必须知道的环境坑（实测）
 

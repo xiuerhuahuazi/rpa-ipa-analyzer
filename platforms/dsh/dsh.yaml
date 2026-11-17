@@ -14,7 +14,7 @@
 #   cp -r skills/rpa-ipa-analyzer/* <workspace>/.agents/skills/rpa-ipa-analyzer/
 
 name: rpa-ipa-analyzer
-version: 3.3.1
+version: 3.3.4
 description: >-
   Analyze, incrementally update, or audit IPA Studio RPA projects.
   Modes: analyze (quick/standard/deep), update, audit.

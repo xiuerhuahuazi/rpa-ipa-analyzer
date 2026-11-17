@@ -2,7 +2,14 @@
 
 ## Unreleased
 
+_暂无_
+
+## 3.3.4 (2026-11-17)
+
+> 本版把此前 Unreleased 的 DSH 适配、`mapping` / `remove-node` 与 3.3.2–3.3.4 的图表检查、嵌套流程块修复一并发布；`VERSION` 与 `platforms/dsh/dsh.yaml` 同步到 3.3.4。
+
 ### Added
+- **`check-mermaid` 报告图表静态检查**（`scripts/_extract/mermaid.py` + `references/mermaid_check.md`）：边标签里的 `( ) [ ] { } ;`、节点/子图标签未加引号、`-.文字.->` 形式的虚线边、围栏未闭合等判 **ERROR**；`--strict` 连 WARN 一起清零；`--self-test` 内置 12 条回归用例。起因是两次真实事故：`-->|int(total) != 0|` 与 `G1[…(…)]` 在 mermaid 11.17.2 / 12.2.0 上都报 `Parse error ... got 'PS'`，**整张图不渲染而正文一切正常**，纯文本检查发现不了（第二次事故正是 3.3.2 的检查器漏检放行的）
 - **DSH 平台适配**：`platforms/dsh/dsh.yaml` + `skills/rpa-ipa-analyzer/DSH.md`；技能正文改用 `<SK>` 约定（DSH 不替换 `{SKILL_ROOT}` 占位符，只注入技能基目录）
 - **跨平台启动器 `scripts/rpa.cmd` / `scripts/rpa.sh`**：自动解析 Python 3.8+ 解释器（`$RPA_IPA_PYTHON` → 项目虚拟环境 → PATH → `py -3`，逐个校验版本），并固定附加 `-X utf8`
 - **`extract_nodes.py mapping`**：补丁节点入/出参映射与流程 `global_vars`。`apply` 明确不改这些字段，此前只能手写脚本。出参映射的 value 必须是该流程已登记的 `global_vars` key，否则直接失败（`--ensure-global-var` 可顺手补登记）；入参映射 value 既不在 `global_vars` 也不在 `globalParams.json` 时告警
@@ -10,17 +17,23 @@
 - **`evals`: `patch_operations`** 用例：在 golden baseline 的临时副本上端到端验证上述两个子命令，并断言「声明未登记的出参会被拒绝」「仍被引用的节点不会被删」
 
 ### Fixed
+- **`_extract/flows.py`：嵌套流程块只展开一层** —— `block_data["blocks"]` 读出来却从未递归，二级及更深块内的节点**整块漏抽**（实测某真实项目 `manifest` 只报 98 个节点，而流程 JSON 实有 241 个／业务 213 个，业务核心整块缺失）。改为按 `blocks[]` 递归整棵块树、`visited` 防环，块名解析走「节点首个 property → 块 `name` → 块 id」兜底链。同一项目重抽后 98 → **214** 节点
+- **`_extract/manifest.py`：文件名里的所属块改名** —— 原先按 12 字符截断**整条层级路径**，二级块会得到 `_流` 这类不可读后缀；改为只取 `parent_block` 最内层块名（`parent_block` / `flow_file` 仍保留 `::` 全层级）
 - `_extract/manifest.py`：抽取出的 `N*.py|js` 在 Windows 上被写成 **CRCRLF**（文本模式写把代码里已有的 `\r\n` 又翻译了一次）。读回时 `\r\r\n` 会折叠成 `\n\n`，于是**正常的「extract → 编辑 → apply」回路会把成倍空行写回流程 JSON**。改为 `newline=""` 写入。实测某节点 808 处 `\r\r\n` 归零，且未编辑时 `apply` 正确全部按 hash 跳过
 - `diff_nodes.py`：按 `seq` 比对，导致增删一个节点后其后所有节点都被误报为「代码变更」。现优先用 `previous_manifest.json` **按 `node_id`** 比对；实测同一场景由「delta=4」变为准确的「删除 1 / delta=1」。旧快照缺 id 时退回原逻辑并打印提示。`--json` 每条记录新增 `node_id`，顶层新增 `basis`
 - `evals_runner.py`：① `subprocess(..., text=True)` 用本地编码解码子进程输出，在 zh-CN Windows 上遇到中文即 `UnicodeDecodeError`（CI 在 Linux 上碰不到）—— 改为显式 `encoding="utf-8"`；② 自身 stdout 未固定编码，中文结果在 Windows 上乱码 —— 启动时 `reconfigure(encoding="utf-8")`
+- `generate_skeleton.py`：`§1.1` 的 mermaid 节点标签原先不加引号（`Main --> xxx[流程名]`），流程名含括号/斜杠时整图解析失败；改为一律 `Main --> xxx["流程名"]`，并在写盘后跑一次静态自检
 - `generate_skeleton.py`：`globalParams.json` 为**顶层数组**时 §3.1 参数表恒为空（原实现只处理 dict 形态）。现在数组与 dict 两种形态都支持
 - `SKILL.md`：`description` 中含 ASCII 冒号+空格（`Modes: `），在严格 YAML 解析器下是非法标量，会导致技能**静默不加载**（DSH 实测：`Nested mappings are not allowed in compact mappings`）。改为全角写法 —— **上游 3.3.1 的 description 同样存在该问题**
 - `extract_nodes.py trace`：变量血缘三个缺陷 —— ① 种子只匹配脚本内变量名，导致 `trace OutputPath` / `out_workpath` 这类**流程变量名**查询恒为空；② 上游方向把途经的全部祖先误标为「生产者」；③ 不跨流程，跨子流程时下游恒为空。现按两个命名空间匹配、只标注真正的生产者/消费者、并给出跨流程桥接提示与同流程血缘链
 
 ### Changed
+- `SKILL.md`：新增「Mermaid 铁律」章节——边标签禁 `( ) [ ] { } ;` 且不要用引号包裹、节点/子图标签一律加引号、虚线边带文字只允许 `-. 文字 .->` 或 `-.->|文字|`、单图宽度 ≤ ~1300px（节点 >20 或 `LR` >12 就拆图）、`stateDiagram` 用 `state "文案" as s0` 别名、定稿前 `check-mermaid` 必须 exit 0；`references/report_template.md` 与 `DSH.md` 同步
+- `SKILL.md`：Token 铁律新增「**块可多层嵌套，级数不设限**」，写明 `parent_block` 用 `::` 拼层级、落盘文件名只取最内层块名，并强调**重抽会重排序号**——`apply --node N` 与报告里的 N 号一律以当前 `manifest.json` 为准
 - `SKILL.md`：新增「第 0 步：解释器与调用」，统一改用启动器调用；补充「子代理差异（Claude Code ↔ DSH）」；新增 `mapping` / `remove-node` 用法与 `diff` 比对基准说明
 - `apply` / `mapping` / `remove-node` 的写盘改为 `newline=""`，行尾风格在 Windows 与 Linux 上一致
 - `evals_runner.py --all` 现在会快照并还原 `component_usage_counts.json` 与 golden fixture 目录，跑完不再弄脏工作区，可重复执行
+- 版本 **3.3.1 → 3.3.4**（`VERSION` / `SKILL.md` / `platforms/dsh/dsh.yaml`）
 
 ---
 
@@ -33,6 +46,8 @@
 
 ### Changed
 - `SKILL.md`：Token 铁律增加「改代码走 apply」；版本 **3.3.0**
+
+- 版本 **3.3.1 → 3.3.4**（`VERSION` / `SKILL.md` / `platforms/dsh/dsh.yaml`）
 
 ---
 ## 3.2.0 (2026-07-28)
@@ -51,6 +66,8 @@
 - `SKILL.md`：统一 describe 三种模式与触发路由
 - `evals_runner.py` / README / CLAUDE.md / Issue·PR 模板：路径与技能列表更新
 - `audit_swarm.md`：触发说明改为模式 C
+
+- 版本 **3.3.1 → 3.3.4**（`VERSION` / `SKILL.md` / `platforms/dsh/dsh.yaml`）
 
 ---
 ## 3.1.0 (2026-07-28)
@@ -73,6 +90,8 @@
 - `generate_skeleton.py` 兼容 `processResult.json` 为 list 的形态
 - hash_snapshot 使用 `sort_keys`，避免变量映射假阳性 diff
 
+- 版本 **3.3.1 → 3.3.4**（`VERSION` / `SKILL.md` / `platforms/dsh/dsh.yaml`）
+
 ---
 ## 3.0.1 (2026-06-24)
 
@@ -90,6 +109,8 @@
 - **`.gitignore`**：允许 `evals/golden/baseline_project/.extracted_nodes/` 入库，CI 无需运行时生成 golden manifest
 - **`evals_runner.py`**：`run_extract` 失败时输出完整诊断信息 + 修复指引
 - **release-drafter**: 移除 PR 触发器（避免在非 main 分支触发），优化 release 模板格式
+
+- 版本 **3.3.1 → 3.3.4**（`VERSION` / `SKILL.md` / `platforms/dsh/dsh.yaml`）
 
 ---
 ## 3.0.0 (2026-06-23)
@@ -128,6 +149,8 @@
 - `references/design_patterns.md`（14 个混排模式 → 被通用/领域分离替代）
 - `scripts/_cli/`（空目录 — 子命令逻辑内联在 extract_nodes.py dispatch 中）
 - `.heuristic.json` 独立文件输出（仅保留 manifest.json 中的全量索引）
+
+- 版本 **3.3.1 → 3.3.4**（`VERSION` / `SKILL.md` / `platforms/dsh/dsh.yaml`）
 
 ---
 

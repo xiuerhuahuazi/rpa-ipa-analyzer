@@ -140,14 +140,16 @@ def generate(project_path: str, depth: str = "standard") -> Path:
     lines.append("```mermaid")
     lines.append("flowchart TB")
     proc_list = proj.get("process_list", [])
+    # 节点标签一律加双引号：名称里可能含括号/斜杠/冒号，裸标签会让 mermaid 解析失败
     if proc_list:
-        lines.append("  Main[主流程]")
+        lines.append('  Main["主流程"]')
         for i, p in enumerate(proc_list[:20]):
             name = Path(p.get("process_path", f"proc{i}")).stem
             safe = re_safe(name)
-            lines.append(f"  Main --> {safe}[{name}]")
+            label = name.replace('"', "'")
+            lines.append(f'  Main --> {safe}["{label}"]')
     else:
-        lines.append("  Main[主流程]")
+        lines.append('  Main["主流程"]')
     lines.append("```")
     lines.append("")
     lines.append("### 1.2 主流程完整路径（脚本生成，待润色）")
@@ -287,8 +289,24 @@ def generate(project_path: str, depth: str = "standard") -> Path:
 
     ed.mkdir(parents=True, exist_ok=True)
     out = ed / "report_skeleton.md"
-    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    text = "\n".join(lines) + "\n"
+    out.write_text(text, encoding="utf-8")
     print(f"[完成] skeleton → {out} ({len(lines)} lines, depth={depth})")
+
+    # 自检：骨架里的 mermaid 必须能通过硬约束（边标签括号等），否则报告一起错
+    try:
+        from _extract.mermaid import check_text
+        errs, warns = check_text(text, label="report_skeleton.md")
+        errs = [e for e in errs if not e["msg"].startswith("E8 未找到")]
+        if errs or warns:
+            print("[mermaid 自检] %d ERROR / %d WARN（详见 rpa.cmd check-mermaid）"
+                  % (len(errs), len(warns)))
+            for e in errs[:5]:
+                print("  [ERROR] %s" % e["msg"])
+        else:
+            print("[mermaid 自检] 通过")
+    except Exception as exc:  # 自检失败不影响骨架产出
+        print("[mermaid 自检] 跳过：%s" % exc)
     return out
 
 

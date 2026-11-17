@@ -17,7 +17,9 @@ on:
 
 jobs:
   evals:
-    runs-on: ubuntu-latest
+    # ubuntu-latest 已切到 26.04，actions/setup-python 在那上面拿不到 3.8/3.9；
+    # 技能声明支持 3.8+，故把矩阵固定在 22.04（3.8-3.12 均可用）。
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
